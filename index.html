@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0c1014" />
+    <meta
+      name="description"
+      content="AgencyDesk AI is the AI back office for insurance agencies. Process inbound PDFs, summarize client files, stage CRM updates, and flag missing forms before your team touches the packet."
+    />
+    <link rel="canonical" href="__SITE_URL__/" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <title>AgencyDesk AI — AI back office for insurance agencies</title>
+
+    <!-- Open Graph (Facebook, LinkedIn, iMessage) -->
+    <meta property="og:site_name" content="AgencyDesk AI" />
+    <meta property="og:title" content="AgencyDesk AI — AI back office for insurance agencies" />
+    <meta
+      property="og:description"
+      content="Process inbound PDFs, summarize client files, stage CRM updates, and flag missing forms before your team touches the packet."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="__SITE_URL__/" />
+    <meta property="og:image" content="__OG_IMAGE__" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- X / Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AgencyDesk AI — AI back office for insurance agencies" />
+    <meta
+      name="twitter:description"
+      content="Private beta for insurance agencies. Intake PDFs, summarize files, stage CRM updates — human approval always."
+    />
+    <meta name="twitter:image" content="__OG_IMAGE__" />
+    <meta name="twitter:url" content="__SITE_URL__/" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "AgencyDesk AI",
+        "url": "__SITE_URL__/",
+        "applicationCategory": "BusinessApplication",
+        "description": "AI back office for insurance agencies: PDF intake, client file summaries, staged CRM field updates, and missing-form review with human approval.",
+        "offers": {
+          "@type": "Offer",
+          "availability": "https://schema.org/PreOrder",
+          "description": "Private beta access"
+        }
+      }
+    </script>
+
+    <!-- Netlify static form discovery (hidden, picked up at build time) -->
+    <form name="waitlist" netlify netlify-honeypot="bot-field" hidden>
+      <input type="email" name="email" />
+      <input type="text" name="role" />
+      <input type="text" name="source" />
+    </form>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
