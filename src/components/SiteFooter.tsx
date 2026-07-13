@@ -10,6 +10,7 @@ export const SiteFooter = () => (
       </div>
       <nav className="footer__links" aria-label="Footer">
         <Link to="/privacy">Privacy</Link>
+        <a href={site.appUrl}>Operations console</a>
         <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>
         {site.xUrl ? (
           <a href={site.xUrl} target="_blank" rel="noopener noreferrer">

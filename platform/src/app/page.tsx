@@ -1,91 +1,178 @@
 import Link from 'next/link'
-import { FolderOpen, AlertCircle } from 'lucide-react'
+import { redirect } from 'next/navigation'
+import { AlertCircle, FileText, FolderOpen, Users } from 'lucide-react'
+import { GettingStarted } from '@/components/GettingStarted'
 import { NewAccountForm } from '@/components/NewAccountForm'
 import { getAuthContext } from '@/lib/auth/session'
 import { canWrite } from '@/lib/auth/permissions'
-import { listAccounts } from '@/lib/data'
+import { listAccounts, summarizeWorkspace } from '@/lib/data'
 import { isSupabaseConfigured } from '@/lib/supabase/admin'
+import { ROLE_LABELS } from '@/lib/auth/permissions'
 
 export const dynamic = 'force-dynamic'
+
+function hasAiConfigured() {
+  return Boolean(process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY)
+}
 
 export default async function DashboardPage() {
   if (!isSupabaseConfigured()) {
     return (
-      <div className="mx-auto max-w-xl rounded-lg border border-amber-200 bg-amber-50 p-6">
-        <h1 className="text-base font-semibold text-amber-900">Almost there — connect Supabase</h1>
-        <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm text-amber-900/80">
-          <li>
-            Apply migrations in <code>supabase/migrations/</code> to your Supabase project.
-          </li>
-          <li>
-            Copy <code>platform/.env.example</code> to <code>platform/.env.local</code> and
-            fill in Supabase + AI keys.
-          </li>
-          <li>Restart the dev server.</li>
-        </ol>
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-8">
+          <h1 className="text-xl font-semibold text-amber-950">Connect Supabase to use the console</h1>
+          <p className="mt-2 text-sm text-amber-900/80">
+            The dashboard needs a Supabase project for sign-in, document storage, and your
+            workspace data. This takes about 10 minutes.
+          </p>
+          <ol className="mt-6 list-decimal space-y-3 pl-5 text-sm text-amber-950/90">
+            <li>
+              Create a free project at{' '}
+              <a href="https://supabase.com" className="font-medium underline" target="_blank" rel="noreferrer">
+                supabase.com
+              </a>
+            </li>
+            <li>
+              Run both SQL files in <code className="rounded bg-amber-100 px-1">supabase/migrations/</code>{' '}
+              in the Supabase SQL editor
+            </li>
+            <li>
+              Copy <code className="rounded bg-amber-100 px-1">platform/.env.example</code> to{' '}
+              <code className="rounded bg-amber-100 px-1">platform/.env.local</code> and add your URL,
+              anon key, service role key, and an AI API key
+            </li>
+            <li>
+              Enable <strong>Email</strong> and optionally <strong>Google</strong> / <strong>Apple</strong>{' '}
+              under Authentication → Providers
+            </li>
+            <li>
+              Restart: <code className="rounded bg-amber-100 px-1">cd platform && npm run dev</code> →{' '}
+              <a href="http://localhost:3000" className="font-medium underline">localhost:3000</a>
+            </li>
+          </ol>
+        </div>
+        <p className="text-center text-sm text-slate-500">
+          The marketing site runs separately at{' '}
+          <a href="http://localhost:5173" className="underline">localhost:5173</a>. The product
+          console is on port <strong>3000</strong>.
+        </p>
       </div>
     )
   }
 
   const auth = await getAuthContext()
-  if (!auth) return null
+  if (!auth) redirect('/login')
 
   const accounts = await listAccounts(auth.workspaceId)
+  const stats = summarizeWorkspace(accounts)
   const canCreate = canWrite(auth.role)
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-            Client accounts
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            One account per client file. Upload documents, let the AI read them, then
-            review and approve.
-          </p>
+      <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-6 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+              {ROLE_LABELS[auth.role]} · Operations console
+            </p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
+              Client accounts
+            </h1>
+            <p className="mt-2 max-w-xl text-sm text-slate-600">
+              Upload insurance documents, let the AI read and extract every field, review with
+              your team, then generate account summaries and CRM-ready updates.
+            </p>
+          </div>
+          {canCreate && <NewAccountForm />}
         </div>
-        {canCreate && <NewAccountForm />}
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { icon: Users, label: 'Accounts', value: stats.accountCount },
+            { icon: FileText, label: 'Documents', value: stats.documentCount },
+            { icon: FolderOpen, label: 'Processed', value: stats.processedCount },
+            {
+              icon: AlertCircle,
+              label: 'Fields to review',
+              value: stats.pendingReviewCount,
+              warn: stats.pendingReviewCount > 0,
+            },
+          ].map((item) => {
+            const Icon = item.icon
+            return (
+              <div
+                key={item.label}
+                className="rounded-lg border border-slate-200 bg-white px-4 py-3"
+              >
+                <div className="flex items-center gap-2 text-xs text-slate-500">
+                  <Icon size={14} />
+                  {item.label}
+                </div>
+                <p
+                  className={`mt-1 text-2xl font-semibold ${
+                    item.warn ? 'text-amber-700' : 'text-slate-900'
+                  }`}
+                >
+                  {item.value}
+                </p>
+              </div>
+            )
+          })}
+        </div>
       </div>
 
+      <GettingStarted
+        accounts={accounts}
+        canCreate={canCreate}
+        hasAiKey={hasAiConfigured()}
+      />
+
       {accounts.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-white p-12 text-center">
-          <FolderOpen className="mx-auto text-slate-300" size={32} />
-          <p className="mt-3 text-sm font-medium text-slate-700">No accounts yet</p>
-          <p className="mt-1 text-sm text-slate-500">
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
+          <FolderOpen className="mx-auto text-slate-300" size={40} />
+          <p className="mt-4 text-base font-medium text-slate-800">No client accounts yet</p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
             {canCreate
-              ? 'Create your first client account to start processing documents.'
-              : 'No accounts in your workspace yet. Ask an owner to create one.'}
+              ? 'Create your first account — e.g. a renewal client — then upload their ACORD forms, loss runs, and dec pages.'
+              : 'No accounts in your workspace yet. Ask an owner to create one or send you an invitation.'}
           </p>
         </div>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {accounts.map((account) => (
-            <li key={account.id}>
-              <Link
-                href={`/accounts/${account.id}`}
-                className="block rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-400"
-              >
-                <p className="font-medium text-slate-900">{account.name}</p>
-                <p className="mt-1 text-xs text-slate-400">
-                  Created {new Date(account.created_at).toLocaleDateString()}
-                </p>
-                <div className="mt-4 flex items-center gap-4 text-xs">
-                  <span className="text-slate-500">
-                    {account.documentCount}{' '}
-                    {account.documentCount === 1 ? 'document' : 'documents'}
-                  </span>
-                  {account.pendingReviewCount > 0 && (
-                    <span className="flex items-center gap-1 font-medium text-amber-700">
-                      <AlertCircle size={13} />
-                      {account.pendingReviewCount} fields to review
+        <section className="space-y-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            All accounts
+          </h2>
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {accounts.map((account) => (
+              <li key={account.id}>
+                <Link
+                  href={`/accounts/${account.id}`}
+                  className="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-400 hover:shadow-md"
+                >
+                  <p className="font-medium text-slate-900">{account.name}</p>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Created {new Date(account.created_at).toLocaleDateString()}
+                  </p>
+                  <div className="mt-4 flex flex-wrap items-center gap-3 text-xs">
+                    <span className="text-slate-500">
+                      {account.documentCount}{' '}
+                      {account.documentCount === 1 ? 'document' : 'documents'}
                     </span>
-                  )}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                    <span className="text-slate-400">
+                      {account.processedDocumentCount} processed
+                    </span>
+                    {account.pendingReviewCount > 0 && (
+                      <span className="flex items-center gap-1 font-medium text-amber-700">
+                        <AlertCircle size={13} />
+                        {account.pendingReviewCount} to review
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   )

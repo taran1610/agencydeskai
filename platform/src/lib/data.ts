@@ -11,6 +11,14 @@ import type {
 
 export interface AccountListItem extends Account {
   documentCount: number
+  processedDocumentCount: number
+  pendingReviewCount: number
+}
+
+export interface WorkspaceStats {
+  accountCount: number
+  documentCount: number
+  processedCount: number
   pendingReviewCount: number
 }
 
@@ -28,7 +36,7 @@ export async function listAccounts(workspaceId: string): Promise<AccountListItem
 
   const ids = accounts.map((account) => account.id)
   const [{ data: docs }, { data: pending }] = await Promise.all([
-    db.from('documents').select('account_id').in('account_id', ids),
+    db.from('documents').select('account_id, status').in('account_id', ids),
     db
       .from('extractions')
       .select('account_id')
@@ -37,8 +45,12 @@ export async function listAccounts(workspaceId: string): Promise<AccountListItem
   ])
 
   const docCounts = new Map<string, number>()
+  const processedCounts = new Map<string, number>()
   for (const row of docs ?? []) {
     docCounts.set(row.account_id, (docCounts.get(row.account_id) ?? 0) + 1)
+    if (row.status === 'processed') {
+      processedCounts.set(row.account_id, (processedCounts.get(row.account_id) ?? 0) + 1)
+    }
   }
   const pendingCounts = new Map<string, number>()
   for (const row of pending ?? []) {
@@ -48,8 +60,18 @@ export async function listAccounts(workspaceId: string): Promise<AccountListItem
   return accounts.map((account) => ({
     ...account,
     documentCount: docCounts.get(account.id) ?? 0,
+    processedDocumentCount: processedCounts.get(account.id) ?? 0,
     pendingReviewCount: pendingCounts.get(account.id) ?? 0,
   }))
+}
+
+export function summarizeWorkspace(accounts: AccountListItem[]): WorkspaceStats {
+  return {
+    accountCount: accounts.length,
+    documentCount: accounts.reduce((sum, a) => sum + a.documentCount, 0),
+    processedCount: accounts.reduce((sum, a) => sum + a.processedDocumentCount, 0),
+    pendingReviewCount: accounts.reduce((sum, a) => sum + a.pendingReviewCount, 0),
+  }
 }
 
 export interface AccountDetail {

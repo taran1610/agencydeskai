@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { ArrowLeft, History } from 'lucide-react'
 import { AnalysisPanel } from '@/components/AnalysisPanel'
 import { DocumentCard } from '@/components/DocumentCard'
@@ -19,7 +19,7 @@ export default async function AccountPage({
   params: Promise<{ id: string }>
 }) {
   const auth = await getAuthContext()
-  if (!auth) return null
+  if (!auth) redirect('/login')
 
   const { id } = await params
   const detail = await getAccountDetail(id, auth.workspaceId)

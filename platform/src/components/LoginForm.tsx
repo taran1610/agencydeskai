@@ -1,24 +1,31 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { OAuthButtons } from '@/components/OAuthButtons'
 
 export function LoginForm({
   defaultEmail = '',
   lockEmail = false,
+  showOAuth = true,
 }: {
   defaultEmail?: string
   lockEmail?: boolean
+  showOAuth?: boolean
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const authError = searchParams.get('error')
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState(defaultEmail)
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [workspaceName, setWorkspaceName] = useState('')
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(
+    authError === 'auth' ? 'Sign-in was cancelled or failed. Try again.' : null,
+  )
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -57,6 +64,17 @@ export function LoginForm({
 
   return (
     <div className="mx-auto w-full max-w-sm">
+      {showOAuth && !lockEmail && (
+        <>
+          <OAuthButtons />
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-xs text-slate-400">or use email</span>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
+        </>
+      )}
+
       {!lockEmail && (
         <div className="mb-6 flex rounded-lg border border-slate-200 bg-slate-50 p-1">
           <button
@@ -134,7 +152,7 @@ export function LoginForm({
           disabled={busy}
           className="w-full rounded-md bg-slate-900 py-2.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
         >
-          {busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
+          {busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in with email'}
         </button>
       </form>
     </div>

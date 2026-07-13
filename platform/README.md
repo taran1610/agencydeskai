@@ -14,6 +14,10 @@ The main product: an AI operations teammate for insurance agencies.
 
 ## Auth & roles
 
+Sign in with **Google**, **Apple**, or **email/password** (enable providers in Supabase → Authentication → Providers).
+
+For Google: add your OAuth client ID/secret in Supabase and set redirect URL to `http://localhost:3000/api/auth/callback` (and your production URL).
+
 | Role | Permissions |
 |------|-------------|
 | **Owner** | Everything + invite team members |

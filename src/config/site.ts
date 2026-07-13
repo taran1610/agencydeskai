@@ -22,6 +22,8 @@ export const site = {
   xUrl: xHandleRaw ? `https://x.com/${xHandleRaw}` : '',
   contactEmail: import.meta.env.VITE_CONTACT_EMAIL || CONTACT_EMAIL,
   plausibleDomain: import.meta.env.VITE_PLAUSIBLE_DOMAIN || '',
+  /** Operations console (Next.js app in platform/) */
+  appUrl: trimTrailingSlash(import.meta.env.VITE_APP_URL || 'http://localhost:3000'),
 } as const
 
 export const xShareUrl = (text: string) => {

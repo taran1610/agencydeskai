@@ -9,6 +9,14 @@ import {
   Eye,
   Link as LinkIcon,
   Lock,
+  FileText,
+  Users,
+  Building2,
+  Briefcase,
+  CheckCircle2,
+  ArrowRight,
+  Database,
+  Upload,
 } from 'lucide-react'
 import { HeroAnimation } from '../components/HeroAnimation'
 import { WaitlistForm } from '../components/WaitlistForm'
@@ -68,6 +76,72 @@ const metrics = [
   },
 ] as const
 
+const features = [
+  {
+    icon: FileText,
+    title: 'Reads every document type',
+    body:
+      'ACORD applications (125, 126, 140), loss runs, declarations pages, certificates of insurance, policy documents, endorsements, quotes, and correspondence — PDF or scanned.',
+  },
+  {
+    icon: Sparkles,
+    title: 'Classifies & extracts automatically',
+    body:
+      'The AI detects document type, pulls insured name, policy numbers, effective dates, limits, carriers, premiums, and claim history — each field with a confidence score and source citation.',
+  },
+  {
+    icon: Flag,
+    title: 'Flags what’s missing or wrong',
+    body:
+      'Missing loss runs, unsigned applications, expired certificates, mismatched policy numbers across documents — surfaced before your team wastes time.',
+  },
+  {
+    icon: Database,
+    title: 'Prepares CRM-ready updates',
+    body:
+      'Account summaries and suggested AMS field updates you can copy-paste. Nothing writes to your system of record until a human approves.',
+  },
+  {
+    icon: Users,
+    title: 'Team workspace with roles',
+    body:
+      'Owners, reviewers, and viewers. Invite your account managers and ops staff. Every action logged in an audit trail.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Human-in-the-loop by default',
+    body:
+      'Approve, edit, or reject every extracted value. Bulk-approve high-confidence fields. Export CSV or HTML reports for your files.',
+  },
+] as const
+
+const howItWorks = [
+  { step: '01', title: 'Create a client account', body: 'One account per insured — your digital client file.' },
+  { step: '02', title: 'Upload the packet', body: 'Drag and drop ACORDs, loss runs, dec pages, COIs. Multiple files at once.' },
+  { step: '03', title: 'AI reads every document', body: 'Classification + field extraction with confidence scores and source notes.' },
+  { step: '04', title: 'Your team reviews', body: 'Approve, edit, or reject each field. Bulk-approve fields above 90% confidence.' },
+  { step: '05', title: 'Generate the account analysis', body: 'Summary, severity-ranked flags, CRM update block, and prioritized action items.' },
+  { step: '06', title: 'Copy to your AMS or export', body: 'Paste the CRM block into your system. Export CSV extractions or an HTML report.' },
+] as const
+
+const idealCustomers = [
+  {
+    icon: Briefcase,
+    title: 'Independent insurance brokers',
+    body: 'You handle dozens of renewals and new business submissions. Intake eats your week.',
+  },
+  {
+    icon: Building2,
+    title: 'P&C agency owners',
+    body: 'You want your team focused on clients and sales — not re-keying ACORD data into the AMS.',
+  },
+  {
+    icon: Users,
+    title: 'Operations & account managers',
+    body: 'You prep renewal files, chase missing forms, and update CRM records before every meeting.',
+  },
+] as const
+
 const trustBullets = [
   {
     icon: ShieldCheck,
@@ -116,10 +190,15 @@ export const LandingPage = () => {
             <span className="brand__name">AgencyDesk AI</span>
           </Link>
           <nav className="nav__links" aria-label="Page sections">
-            <a href="#workflow">Workflow</a>
+            <a href="#features">What we do</a>
+            <a href="#how-it-works">How it works</a>
+            <a href="#for-brokers">Who it&rsquo;s for</a>
             <a href="#trust">Trust</a>
-            <a href="#beta" className="nav__cta">
-              Join beta
+            <a href={site.appUrl} className="nav__signin">
+              Sign in
+            </a>
+            <a href={site.appUrl} className="nav__cta">
+              Launch console
             </a>
           </nav>
         </div>
@@ -174,6 +253,14 @@ export const LandingPage = () => {
                   updates, and flags missing forms — so brokers can manage more
                   clients with less manual work.
                 </p>
+                <div className="hero__actions">
+                  <a href={site.appUrl} className="hero__cta-primary">
+                    Launch console <ArrowRight size={16} aria-hidden />
+                  </a>
+                  <a href="#beta" className="hero__cta-secondary">
+                    Join waitlist
+                  </a>
+                </div>
                 <div className="hero__form-wrap">
                   <WaitlistForm
                     variant="hero"
@@ -209,6 +296,40 @@ export const LandingPage = () => {
                 <div className="metric__label">{m.label}</div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* WHAT WE DO */}
+        <section id="features" className="features">
+          <div className="container">
+            <div className="section-head">
+              <div className="eyebrow eyebrow--dark">
+                <span className="eyebrow__dot" aria-hidden />
+                What AgencyDesk does
+              </div>
+              <h2 className="section-head__title">
+                Insurance operations work — done by AI, reviewed by your team.
+              </h2>
+              <p className="section-head__sub">
+                Not a generic document chatbot. AgencyDesk is built for the repetitive
+                back-office jobs brokers and agencies do every day: reading packets,
+                updating client files, and catching what&rsquo;s missing before renewal season.
+              </p>
+            </div>
+            <ul className="features__grid">
+              {features.map((f) => {
+                const Icon = f.icon
+                return (
+                  <li key={f.title} className="feature-card">
+                    <span className="feature-card__icon" aria-hidden>
+                      <Icon size={22} strokeWidth={1.8} />
+                    </span>
+                    <h3 className="feature-card__title">{f.title}</h3>
+                    <p className="feature-card__body">{f.body}</p>
+                  </li>
+                )
+              })}
+            </ul>
           </div>
         </section>
 
@@ -252,6 +373,82 @@ export const LandingPage = () => {
                 )
               })}
             </ol>
+          </div>
+        </section>
+
+        {/* HOW IT WORKS */}
+        <section id="how-it-works" className="how-it-works">
+          <div className="container">
+            <div className="section-head">
+              <div className="eyebrow">
+                <span className="eyebrow__dot" aria-hidden />
+                How it works
+              </div>
+              <h2 className="section-head__title section-head__title--light">
+                From upload to CRM-ready output in one workflow.
+              </h2>
+              <p className="section-head__sub section-head__sub--light">
+                Sign in with Google, Apple, or email. Create your workspace, invite your
+                team, and process your first client file in minutes.
+              </p>
+            </div>
+            <ol className="how__grid">
+              {howItWorks.map((item) => (
+                <li key={item.step} className="how-card">
+                  <span className="how-card__step">{item.step}</span>
+                  <h3 className="how-card__title">{item.title}</h3>
+                  <p className="how-card__body">{item.body}</p>
+                </li>
+              ))}
+            </ol>
+            <div className="how__cta">
+              <a href={site.appUrl} className="how__cta-btn">
+                <Upload size={18} aria-hidden /> Open the operations console
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* IDEAL CUSTOMER */}
+        <section id="for-brokers" className="for-brokers">
+          <div className="container">
+            <div className="section-head">
+              <div className="eyebrow eyebrow--dark">
+                <span className="eyebrow__dot" aria-hidden />
+                Built for brokers &amp; agencies
+              </div>
+              <h2 className="section-head__title">
+                If paperwork slows you down, this is for you.
+              </h2>
+            </div>
+            <ul className="for-brokers__grid">
+              {idealCustomers.map((c) => {
+                const Icon = c.icon
+                return (
+                  <li key={c.title} className="broker-card">
+                    <span className="broker-card__icon" aria-hidden>
+                      <Icon size={24} strokeWidth={1.8} />
+                    </span>
+                    <h3 className="broker-card__title">{c.title}</h3>
+                    <p className="broker-card__body">{c.body}</p>
+                  </li>
+                )
+              })}
+            </ul>
+            <ul className="for-brokers__checks">
+              {[
+                'Processes ACORDs, loss runs, dec pages, and COIs',
+                'Summarizes entire client files for renewal prep',
+                'Flags missing signatures, forms, and inconsistent data',
+                'Prepares copy-paste CRM updates with source citations',
+                'Sign in with Google, Apple, or email — team invites included',
+              ].map((text) => (
+                <li key={text}>
+                  <CheckCircle2 size={16} aria-hidden />
+                  {text}
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
@@ -302,8 +499,12 @@ export const LandingPage = () => {
             </div>
             <h2 className="cta__title">Join the first agency pilots.</h2>
             <p className="cta__sub">
-              We are looking for agencies that want faster intake and renewal
-              prep without giving up human review.
+              We are looking for brokers and agencies that want faster intake and renewal
+              prep without giving up human review — or{' '}
+              <a href={site.appUrl} className="cta__link">
+                launch the console now
+              </a>{' '}
+              if you already have access.
             </p>
             <div className="cta__form-wrap">
               <WaitlistForm
