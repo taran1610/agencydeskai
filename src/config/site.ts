@@ -11,9 +11,9 @@ const xHandleRaw = (import.meta.env.VITE_X_HANDLE || '').replace(/^@/, '')
 
 export const site = {
   name: 'AgencyDesk AI',
-  tagline: 'AI back office for insurance agencies',
+  tagline: 'AI operations for insurance brokers',
   description:
-    'Process inbound PDFs, summarize client files, stage CRM updates, and flag missing forms before your team touches the packet.',
+    'AI that does insurance operations work for brokers. Reads ACORDs, loss runs, and dec pages, summarizes client files, prepares CRM updates, and flags missing forms — so brokers can manage more clients with less manual work.',
   url: siteUrl,
   // Use og-image.png for X/Twitter (export from public/og-image.svg). SVG is the source file.
   ogImage: `${siteUrl}/og-image.png`,

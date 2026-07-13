@@ -9,7 +9,7 @@
 
   <!-- headline -->
   <text x="80" y="120" fill="#f3f5f7" font-family="Inter, system-ui, sans-serif" font-size="64" font-weight="600" letter-spacing="-2">AgencyDesk AI</text>
-  <text x="80" y="175" fill="#8a93a1" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="500">AI back office for insurance agencies</text>
+  <text x="80" y="175" fill="#8a93a1" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="500">AI operations for insurance brokers</text>
 
   <!-- left panel -->
   <rect x="80" y="230" width="300" height="320" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)"/>

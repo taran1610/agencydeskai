@@ -2,7 +2,7 @@ import { xShareUrl } from '../config/site'
 import { trackEvent } from './Analytics'
 
 const SHARE_TEXT =
-  "We're opening a private beta for AgencyDesk AI — an AI back office for insurance agencies. Intake PDFs, summarize client files, stage CRM updates, and flag missing forms. Human approval always."
+  "We're opening a private beta for AgencyDesk AI — AI that does insurance operations work for brokers. Reads ACORDs, loss runs, and dec pages, summarizes client files, prepares CRM updates, and flags missing forms."
 
 export const ShareOnX = () => (
   <a

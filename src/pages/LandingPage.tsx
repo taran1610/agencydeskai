@@ -163,14 +163,16 @@ export const LandingPage = () => {
               <div className="hero__copy">
                 <div className="eyebrow">
                   <span className="eyebrow__dot" aria-hidden />
-                  AI back office for insurance agencies
+                  AI operations for insurance brokers
                 </div>
                 <h1 id="hero-heading" className="hero__headline">
                   AgencyDesk <span className="accent-teal">AI</span>
                 </h1>
                 <p className="hero__sub">
-                  Process inbound PDFs, summarize client files, prepare CRM fields,
-                  and flag missing forms before your team touches the packet.
+                  AI that does insurance operations work for brokers. Reads ACORDs,
+                  loss runs, and dec pages, summarizes client files, prepares CRM
+                  updates, and flags missing forms — so brokers can manage more
+                  clients with less manual work.
                 </p>
                 <div className="hero__form-wrap">
                   <WaitlistForm
