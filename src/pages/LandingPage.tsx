@@ -1,4 +1,3 @@
-import { Player } from '@remotion/player'
 import { Link } from 'react-router-dom'
 import {
   ClipboardCheck,
@@ -18,7 +17,7 @@ import {
   Database,
   Upload,
 } from 'lucide-react'
-import { HeroAnimation } from '../components/HeroAnimation'
+import { HeroPlayer } from '../components/HeroPlayer'
 import { WaitlistForm } from '../components/WaitlistForm'
 import { SeoHead } from '../components/SeoHead'
 import { ShareOnX } from '../components/ShareOnX'
@@ -218,21 +217,7 @@ export const LandingPage = () => {
             }
           >
             <div className="hero__animation-inner">
-              <Player
-                component={HeroAnimation}
-                durationInFrames={240}
-                fps={30}
-                compositionWidth={1200}
-                compositionHeight={700}
-                loop={!reduceMotion}
-                autoPlay={!reduceMotion}
-                initialFrame={reduceMotion ? 120 : 0}
-                controls={false}
-                showVolumeControls={false}
-                clickToPlay={false}
-                doubleClickToFullscreen={false}
-                style={{ width: '100%', height: '100%' }}
-              />
+              <HeroPlayer reduceMotion={reduceMotion} />
             </div>
             <div className="hero__animation-veil" />
           </div>
