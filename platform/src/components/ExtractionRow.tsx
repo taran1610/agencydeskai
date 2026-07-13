@@ -2,20 +2,29 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Check, Pencil, X } from 'lucide-react'
+import { Check, Pencil, Sparkles, UserCheck, X } from 'lucide-react'
 import { ConfidenceBadge } from '@/components/ConfidenceBadge'
 import type { Extraction, ExtractionStatus } from '@/lib/types'
 
-export function ExtractionRow({ extraction }: { extraction: Extraction }) {
+export function ExtractionRow({
+  extraction,
+  canReview = true,
+}: {
+  extraction: Extraction
+  canReview?: boolean
+}) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(extraction.edited_value ?? extraction.value)
 
+  const isHumanEdited = extraction.status === 'edited'
+  const isApproved = extraction.status === 'approved'
+  const isRejected = extraction.status === 'rejected'
+  const isPending = extraction.status === 'pending'
+
   const effectiveValue =
-    extraction.status === 'edited' && extraction.edited_value
-      ? extraction.edited_value
-      : extraction.value
+    isHumanEdited && extraction.edited_value ? extraction.edited_value : extraction.value
 
   async function review(status: ExtractionStatus, editedValue?: string) {
     setBusy(true)
@@ -38,50 +47,81 @@ export function ExtractionRow({ extraction }: { extraction: Extraction }) {
     }
   }
 
+  const rowBg = isHumanEdited
+    ? 'bg-indigo-50/60'
+    : isApproved
+      ? 'bg-emerald-50/40'
+      : isRejected
+        ? 'bg-red-50/30'
+        : ''
+
   return (
-    <tr className="border-t border-slate-100">
-      <td className="w-52 px-4 py-2 align-top text-xs font-medium text-slate-500">
+    <tr className={`border-t border-slate-100 ${rowBg}`}>
+      <td className="w-52 px-4 py-2.5 align-top text-xs font-medium text-slate-500">
         {extraction.field_label}
         {extraction.source_note && (
-          <span className="mt-0.5 block font-normal text-slate-400">
-            {extraction.source_note}
+          <span className="mt-1 block rounded bg-slate-100 px-1.5 py-0.5 font-normal text-[10px] leading-snug text-slate-500">
+            📄 {extraction.source_note}
           </span>
         )}
       </td>
-      <td className="px-2 py-2 align-top text-slate-800">
+      <td className="px-2 py-2.5 align-top">
         {editing ? (
           <input
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
-            className="w-full rounded border border-slate-300 px-2 py-1 text-sm focus:border-slate-500 focus:outline-none"
+            className="w-full rounded border border-indigo-300 px-2 py-1 text-sm focus:border-indigo-500 focus:outline-none"
             autoFocus
           />
         ) : (
-          <>
-            <span className={extraction.status === 'rejected' ? 'line-through opacity-50' : ''}>
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              {isPending && (
+                <span className="inline-flex items-center gap-0.5 rounded border border-violet-200 bg-violet-50 px-1.5 py-0.5 text-[10px] font-medium text-violet-700">
+                  <Sparkles size={9} /> AI suggested
+                </span>
+              )}
+              {isHumanEdited && (
+                <span className="inline-flex items-center gap-0.5 rounded border border-indigo-200 bg-indigo-100 px-1.5 py-0.5 text-[10px] font-medium text-indigo-800">
+                  <UserCheck size={9} /> Human edited
+                </span>
+              )}
+              {isApproved && !isHumanEdited && (
+                <span className="inline-flex items-center gap-0.5 rounded border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700">
+                  <Check size={9} /> Approved
+                </span>
+              )}
+            </div>
+            <p
+              className={`text-sm text-slate-800 ${isRejected ? 'line-through opacity-50' : ''} ${
+                isHumanEdited ? 'font-medium text-indigo-900' : ''
+              }`}
+            >
               {effectiveValue}
-            </span>
-            {extraction.status === 'edited' && (
-              <span className="ml-2 text-xs text-slate-400 line-through">
-                {extraction.value}
-              </span>
+            </p>
+            {isHumanEdited && (
+              <p className="text-xs text-slate-400">
+                AI had: <span className="line-through">{extraction.value}</span>
+              </p>
             )}
-          </>
+          </div>
         )}
       </td>
-      <td className="w-16 px-2 py-2 align-top">
+      <td className="w-16 px-2 py-2.5 align-top">
         <ConfidenceBadge value={extraction.confidence} />
       </td>
-      <td className="w-40 px-4 py-2 align-top">
-        {editing ? (
+      <td className="w-44 px-4 py-2.5 align-top">
+        {!canReview ? (
+          <span className="text-xs text-slate-400">{extraction.status}</span>
+        ) : editing ? (
           <div className="flex gap-1.5">
             <button
               type="button"
               onClick={() => review('edited', draft)}
               disabled={busy || !draft.trim()}
-              className="rounded bg-slate-900 px-2 py-1 text-xs font-medium text-white disabled:opacity-50"
+              className="rounded bg-indigo-700 px-2 py-1 text-xs font-medium text-white disabled:opacity-50"
             >
-              Save
+              Save edit
             </button>
             <button
               type="button"
@@ -91,13 +131,13 @@ export function ExtractionRow({ extraction }: { extraction: Extraction }) {
               Cancel
             </button>
           </div>
-        ) : extraction.status === 'pending' ? (
+        ) : isPending ? (
           <div className="flex gap-1">
             <button
               type="button"
               onClick={() => review('approved')}
               disabled={busy}
-              title="Approve"
+              title="Approve AI value"
               className="rounded border border-emerald-200 p-1.5 text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"
             >
               <Check size={13} />
@@ -106,8 +146,8 @@ export function ExtractionRow({ extraction }: { extraction: Extraction }) {
               type="button"
               onClick={() => setEditing(true)}
               disabled={busy}
-              title="Edit"
-              className="rounded border border-slate-200 p-1.5 text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+              title="Edit before approving"
+              className="rounded border border-indigo-200 p-1.5 text-indigo-600 transition hover:bg-indigo-50 disabled:opacity-50"
             >
               <Pencil size={13} />
             </button>
@@ -127,9 +167,9 @@ export function ExtractionRow({ extraction }: { extraction: Extraction }) {
             onClick={() => review('pending')}
             disabled={busy}
             className={`rounded px-2 py-0.5 text-[11px] font-medium ${
-              extraction.status === 'approved'
+              isApproved
                 ? 'bg-emerald-50 text-emerald-700'
-                : extraction.status === 'edited'
+                : isHumanEdited
                   ? 'bg-indigo-50 text-indigo-700'
                   : 'bg-red-50 text-red-600'
             }`}

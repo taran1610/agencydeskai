@@ -5,6 +5,8 @@ import type {
   AuditEntry,
   DocumentRow,
   Extraction,
+  Invitation,
+  WorkspaceMember,
 } from '@/lib/types'
 
 export interface AccountListItem extends Account {
@@ -12,11 +14,12 @@ export interface AccountListItem extends Account {
   pendingReviewCount: number
 }
 
-export async function listAccounts(): Promise<AccountListItem[]> {
+export async function listAccounts(workspaceId: string): Promise<AccountListItem[]> {
   const db = supabaseAdmin()
   const { data: accounts, error } = await db
     .from('accounts')
     .select('*')
+    .eq('workspace_id', workspaceId)
     .eq('status', 'active')
     .order('created_at', { ascending: false })
     .returns<Account[]>()
@@ -53,16 +56,20 @@ export interface AccountDetail {
   account: Account
   documents: DocumentRow[]
   extractions: Extraction[]
-  latestAnalysis: AccountAnalysis | null
+  analyses: AccountAnalysis[]
   auditTrail: AuditEntry[]
 }
 
-export async function getAccountDetail(accountId: string): Promise<AccountDetail | null> {
+export async function getAccountDetail(
+  accountId: string,
+  workspaceId: string,
+): Promise<AccountDetail | null> {
   const db = supabaseAdmin()
   const { data: account } = await db
     .from('accounts')
     .select('*')
     .eq('id', accountId)
+    .eq('workspace_id', workspaceId)
     .single<Account>()
   if (!account) return null
 
@@ -85,7 +92,6 @@ export async function getAccountDetail(accountId: string): Promise<AccountDetail
         .select('*')
         .eq('account_id', accountId)
         .order('created_at', { ascending: false })
-        .limit(1)
         .returns<AccountAnalysis[]>(),
       db
         .from('audit_log')
@@ -100,7 +106,45 @@ export async function getAccountDetail(accountId: string): Promise<AccountDetail
     account,
     documents: documents ?? [],
     extractions: extractions ?? [],
-    latestAnalysis: analyses?.[0] ?? null,
+    analyses: analyses ?? [],
     auditTrail: audit ?? [],
   }
+}
+
+export async function listTeamMembers(workspaceId: string): Promise<WorkspaceMember[]> {
+  const db = supabaseAdmin()
+  const { data: members, error } = await db
+    .from('workspace_members')
+    .select('*')
+    .eq('workspace_id', workspaceId)
+    .order('created_at', { ascending: true })
+  if (error) throw new Error(error.message)
+  if (!members?.length) return []
+
+  const userIds = members.map((m) => m.user_id)
+  const { data: profiles } = await db
+    .from('profiles')
+    .select('id, email, full_name')
+    .in('id', userIds)
+
+  const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]))
+
+  return members.map((member) => ({
+    ...member,
+    profile: profileMap.get(member.user_id),
+  })) as WorkspaceMember[]
+}
+
+export async function listPendingInvitations(workspaceId: string): Promise<Invitation[]> {
+  const db = supabaseAdmin()
+  const { data, error } = await db
+    .from('invitations')
+    .select('*')
+    .eq('workspace_id', workspaceId)
+    .is('accepted_at', null)
+    .gt('expires_at', new Date().toISOString())
+    .order('created_at', { ascending: false })
+    .returns<Invitation[]>()
+  if (error) throw new Error(error.message)
+  return data ?? []
 }

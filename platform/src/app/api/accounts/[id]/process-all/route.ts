@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { isAuthContext, requireAuth, requireWrite } from '@/lib/auth/session'
-import { analyzeAccount } from '@/lib/pipeline'
+import { processAllDocuments } from '@/lib/pipeline'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export const maxDuration = 300
@@ -27,10 +27,10 @@ export async function POST(
   }
 
   try {
-    const analysis = await analyzeAccount(id, auth.userId)
-    return NextResponse.json({ analysis })
+    const result = await processAllDocuments(id, auth.userId)
+    return NextResponse.json(result)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Analysis failed'
+    const message = error instanceof Error ? error.message : 'Batch processing failed'
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

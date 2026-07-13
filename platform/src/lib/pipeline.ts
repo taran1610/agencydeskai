@@ -1,3 +1,4 @@
+import { formatCrmExportBlock } from '@/lib/analysis'
 import { logAudit } from '@/lib/audit'
 import { ACCOUNT_ANALYSIS_SYSTEM, DOCUMENT_READ_SYSTEM } from '@/lib/ai/prompts'
 import { generateStructured } from '@/lib/ai/provider'
@@ -11,7 +12,10 @@ import { DOC_TYPE_LABELS } from '@/lib/types'
  * with per-field confidence and source notes. Replaces any previous extractions
  * for the document so reprocessing is idempotent.
  */
-export async function processDocument(documentId: string): Promise<DocumentRow> {
+export async function processDocument(
+  documentId: string,
+  triggeredByUserId?: string,
+): Promise<DocumentRow> {
   const db = supabaseAdmin()
 
   const { data: doc, error: docError } = await db
@@ -84,6 +88,7 @@ export async function processDocument(documentId: string): Promise<DocumentRow> 
     await logAudit({
       accountId: doc.account_id,
       documentId: doc.id,
+      userId: triggeredByUserId,
       actor: 'ai',
       action: 'document.processed',
       detail: {
@@ -113,7 +118,10 @@ export async function processDocument(documentId: string): Promise<DocumentRow> 
  * The account-level step: turn all reviewed/extracted fields for an account into
  * a summary, flags, suggested CRM updates, and action items.
  */
-export async function analyzeAccount(accountId: string): Promise<AccountAnalysis> {
+export async function analyzeAccount(
+  accountId: string,
+  triggeredByUserId?: string,
+): Promise<AccountAnalysis> {
   const db = supabaseAdmin()
 
   const { data: docs } = await db
@@ -170,6 +178,20 @@ export async function analyzeAccount(accountId: string): Promise<AccountAnalysis
     ],
   })
 
+  const { data: accountRow } = await db
+    .from('accounts')
+    .select('name')
+    .eq('id', accountId)
+    .single()
+
+  const crmBlock =
+    object.crmExportBlock ||
+    formatCrmExportBlock(
+      accountRow?.name ?? 'Account',
+      object.summary,
+      object.suggestedUpdates,
+    )
+
   const { data: analysis, error: insertError } = await db
     .from('account_analyses')
     .insert({
@@ -178,6 +200,7 @@ export async function analyzeAccount(accountId: string): Promise<AccountAnalysis
       flags: object.flags,
       suggested_updates: object.suggestedUpdates,
       action_items: object.actionItems,
+      crm_export_block: crmBlock,
       model,
     })
     .select('*')
@@ -188,6 +211,7 @@ export async function analyzeAccount(accountId: string): Promise<AccountAnalysis
 
   await logAudit({
     accountId,
+    userId: triggeredByUserId,
     actor: 'ai',
     action: 'account.analyzed',
     detail: {
@@ -199,4 +223,33 @@ export async function analyzeAccount(accountId: string): Promise<AccountAnalysis
   })
 
   return analysis
+}
+
+export async function processAllDocuments(
+  accountId: string,
+  triggeredByUserId?: string,
+): Promise<{ processed: number; failed: number; errors: string[] }> {
+  const db = supabaseAdmin()
+  const { data: docs } = await db
+    .from('documents')
+    .select('id, status')
+    .eq('account_id', accountId)
+    .in('status', ['uploaded', 'failed'])
+    .returns<{ id: string; status: string }[]>()
+
+  let processed = 0
+  let failed = 0
+  const errors: string[] = []
+
+  for (const doc of docs ?? []) {
+    try {
+      await processDocument(doc.id, triggeredByUserId)
+      processed++
+    } catch (error) {
+      failed++
+      errors.push(error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  return { processed, failed, errors }
 }

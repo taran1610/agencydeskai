@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { randomUUID } from 'node:crypto'
+import { isAuthContext, requireAuth, requireWrite } from '@/lib/auth/session'
 import { logAudit } from '@/lib/audit'
 import { DOCUMENTS_BUCKET, supabaseAdmin } from '@/lib/supabase/admin'
 import type { DocumentRow } from '@/lib/types'
@@ -13,6 +13,11 @@ const ACCEPTED_TYPES = new Set([
 const MAX_FILE_BYTES = 30 * 1024 * 1024
 
 export async function POST(request: Request) {
+  const auth = await requireAuth('reviewer')
+  if (!isAuthContext(auth)) return auth
+  const denied = requireWrite(auth)
+  if (denied) return denied
+
   const form = await request.formData()
   const accountId = form.get('accountId')
   const files = form.getAll('files').filter((entry): entry is File => entry instanceof File)
@@ -27,8 +32,9 @@ export async function POST(request: Request) {
   const db = supabaseAdmin()
   const { data: account } = await db
     .from('accounts')
-    .select('id')
+    .select('id, workspace_id')
     .eq('id', accountId)
+    .eq('workspace_id', auth.workspaceId)
     .single()
   if (!account) {
     return NextResponse.json({ error: 'Account not found' }, { status: 404 })
@@ -47,7 +53,7 @@ export async function POST(request: Request) {
       continue
     }
 
-    const storagePath = `${accountId}/${randomUUID()}-${file.name.replace(/[^\w.\-]+/g, '_')}`
+    const storagePath = `${accountId}/${crypto.randomUUID()}-${file.name.replace(/[^\w.\-]+/g, '_')}`
     const { error: uploadError } = await db.storage
       .from(DOCUMENTS_BUCKET)
       .upload(storagePath, file, { contentType: file.type })
@@ -77,6 +83,7 @@ export async function POST(request: Request) {
       accountId,
       documentId: doc.id,
       actor: 'human',
+      userId: auth.userId,
       action: 'document.uploaded',
       detail: { filename: file.name, sizeBytes: file.size },
     })

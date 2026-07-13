@@ -63,6 +63,10 @@ export const accountAnalysisSchema = z.object({
       detail: z
         .string()
         .describe('What is wrong or missing and which documents are involved'),
+      sourceDocuments: z
+        .array(z.string())
+        .optional()
+        .describe('Filenames of documents involved in this flag'),
     }),
   ),
   suggestedUpdates: z
@@ -71,6 +75,8 @@ export const accountAnalysisSchema = z.object({
         field: z.string().describe('CRM field name, e.g. "Policy expiration"'),
         suggestedValue: z.string(),
         source: z.string().describe('Which document and section supports this'),
+        sourceDocument: z.string().optional().describe('Filename of source document'),
+        sourceSection: z.string().optional().describe('Section or page in the document'),
       }),
     )
     .describe('Concrete CRM field updates for a human to approve'),
@@ -81,6 +87,11 @@ export const accountAnalysisSchema = z.object({
       priority: z.enum(['high', 'medium', 'low']),
     }),
   ),
+  crmExportBlock: z
+    .string()
+    .describe(
+      'A ready-to-paste CRM update block: account summary plus every suggested field update with sources, formatted for copy-paste into an AMS notes field.',
+    ),
 })
 
 export type AccountAnalysisResult = z.infer<typeof accountAnalysisSchema>

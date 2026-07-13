@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { FileSearch } from "lucide-react";
+import { UserMenu } from "@/components/UserMenu";
+import { getAuthContext } from "@/lib/auth/session";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,11 +22,13 @@ export const metadata: Metadata = {
     "AI operations teammate for insurance agencies: document intake, extraction, flags, and CRM prep with human approval.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const auth = await getAuthContext();
+
   return (
     <html
       lang="en"
@@ -44,9 +48,13 @@ export default function RootLayout({
                 Operations Console
               </span>
             </Link>
-            <span className="text-xs text-slate-400">
-              Human approval required before anything leaves this console
-            </span>
+            {auth ? (
+              <UserMenu email={auth.email} role={auth.role} />
+            ) : (
+              <span className="text-xs text-slate-400">
+                Human approval required before anything leaves this console
+              </span>
+            )}
           </div>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">{children}</main>

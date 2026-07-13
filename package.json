@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:platform": "npm run dev --prefix platform",
+    "build:platform": "npm run build --prefix platform",
     "prebuild": "node scripts/write-sitemap.mjs",
     "og:image": "resvg-js public/og-image.svg public/og-image.png --fit-width 1200",
     "build": "tsc -b && vite build",

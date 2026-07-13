@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { FolderOpen, AlertCircle } from 'lucide-react'
 import { NewAccountForm } from '@/components/NewAccountForm'
+import { getAuthContext } from '@/lib/auth/session'
+import { canWrite } from '@/lib/auth/permissions'
 import { listAccounts } from '@/lib/data'
 import { isSupabaseConfigured } from '@/lib/supabase/admin'
 
@@ -13,13 +15,11 @@ export default async function DashboardPage() {
         <h1 className="text-base font-semibold text-amber-900">Almost there — connect Supabase</h1>
         <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm text-amber-900/80">
           <li>
-            Apply <code>supabase/migrations/202607131400_platform_core.sql</code> to your
-            Supabase project.
+            Apply migrations in <code>supabase/migrations/</code> to your Supabase project.
           </li>
           <li>
             Copy <code>platform/.env.example</code> to <code>platform/.env.local</code> and
-            fill in <code>SUPABASE_URL</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code>, and an
-            AI API key.
+            fill in Supabase + AI keys.
           </li>
           <li>Restart the dev server.</li>
         </ol>
@@ -27,7 +27,11 @@ export default async function DashboardPage() {
     )
   }
 
-  const accounts = await listAccounts()
+  const auth = await getAuthContext()
+  if (!auth) return null
+
+  const accounts = await listAccounts(auth.workspaceId)
+  const canCreate = canWrite(auth.role)
 
   return (
     <div className="space-y-8">
@@ -41,7 +45,7 @@ export default async function DashboardPage() {
             review and approve.
           </p>
         </div>
-        <NewAccountForm />
+        {canCreate && <NewAccountForm />}
       </div>
 
       {accounts.length === 0 ? (
@@ -49,7 +53,9 @@ export default async function DashboardPage() {
           <FolderOpen className="mx-auto text-slate-300" size={32} />
           <p className="mt-3 text-sm font-medium text-slate-700">No accounts yet</p>
           <p className="mt-1 text-sm text-slate-500">
-            Create your first client account to start processing documents.
+            {canCreate
+              ? 'Create your first client account to start processing documents.'
+              : 'No accounts in your workspace yet. Ask an owner to create one.'}
           </p>
         </div>
       ) : (

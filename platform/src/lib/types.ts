@@ -12,10 +12,13 @@ export type DocType =
 export type DocumentStatus = 'uploaded' | 'processing' | 'processed' | 'failed'
 export type ExtractionStatus = 'pending' | 'approved' | 'edited' | 'rejected'
 
+export type UserRole = 'owner' | 'reviewer' | 'viewer'
+
 export interface Account {
   id: string
   name: string
   status: 'active' | 'archived'
+  workspace_id: string
   created_at: string
   updated_at: string
 }
@@ -48,6 +51,7 @@ export interface Extraction {
   source_note: string | null
   status: ExtractionStatus
   edited_value: string | null
+  reviewed_by: string | null
   created_at: string
   reviewed_at: string | null
 }
@@ -57,12 +61,15 @@ export interface AnalysisFlag {
   severity: 'high' | 'medium' | 'low'
   title: string
   detail: string
+  sourceDocuments?: string[]
 }
 
 export interface SuggestedUpdate {
   field: string
   suggestedValue: string
   source: string
+  sourceDocument?: string
+  sourceSection?: string
 }
 
 export interface ActionItem {
@@ -78,7 +85,28 @@ export interface AccountAnalysis {
   flags: AnalysisFlag[]
   suggested_updates: SuggestedUpdate[]
   action_items: ActionItem[]
+  crm_export_block?: string | null
   model: string | null
+  created_at: string
+}
+
+export interface WorkspaceMember {
+  id: string
+  workspace_id: string
+  user_id: string
+  role: UserRole
+  created_at: string
+  profile?: { email: string; full_name: string | null }
+}
+
+export interface Invitation {
+  id: string
+  workspace_id: string
+  email: string
+  role: 'reviewer' | 'viewer'
+  token: string
+  expires_at: string
+  accepted_at: string | null
   created_at: string
 }
 
@@ -86,6 +114,7 @@ export interface AuditEntry {
   id: string
   account_id: string | null
   document_id: string | null
+  user_id: string | null
   actor: 'ai' | 'human' | 'system'
   action: string
   detail: Record<string, unknown>

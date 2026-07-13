@@ -1,60 +1,60 @@
 # AgencyDesk AI
 
-Marketing site and private-beta waitlist for **AgencyDesk AI** — an AI back office for insurance agencies.
+**AgencyDesk AI** is an AI-native insurance operations platform. The main product lives in **`platform/`** — a Next.js operations console where agencies upload client document packets, the AI classifies and extracts fields, humans review and approve, and the system produces account summaries, flags, and CRM-ready updates.
 
-**Live stack:** React 19 · TypeScript · Vite · Remotion (hero animation) · Supabase (waitlist) · deploy to Vercel or Netlify.
+The repo root (`src/`) contains the **marketing site** and waitlist for the private beta.
 
-## Quick start
+## Quick start (product)
+
+```bash
+cd platform
+npm install
+cp .env.example .env.local   # Supabase + AI keys
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). First signup creates your workspace as **owner**. Invite reviewers and viewers from **Settings → Team**.
+
+Apply migrations in `supabase/migrations/` to your Supabase project before first run.
+
+## Quick start (marketing site)
 
 ```bash
 npm install
-cp .env.example .env.local   # fill in VITE_SITE_URL + Supabase keys
+cp .env.example .env.local
 npm run dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173).
 
-## Launch on X
-
-Full checklist: **[docs/LAUNCH.md](docs/LAUNCH.md)**
-
-Minimum for production:
-
-1. Set `VITE_SITE_URL` to your real domain (no trailing slash).
-2. Connect Supabase — **[docs/supabase-setup.md](docs/supabase-setup.md)**.
-3. Generate `public/og-image.png` from `public/og-image.svg` (see LAUNCH.md).
-4. Deploy to Vercel or Netlify with env vars.
-5. Validate your X card, then post your waitlist link.
-
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Local dev server |
-| `npm run build` | Typecheck + production build (`prebuild` writes sitemap/robots) |
-| `npm run preview` | Preview production build |
-| `npm run lint` | ESLint |
-
-## Waitlist data flow
-
-1. **Supabase** (preferred) — `waitlist_signups` table when `VITE_SUPABASE_*` is set.
-2. **localStorage** — backup key `agencydesk-waitlist`.
-3. **Netlify Forms** — best-effort POST when hosted on Netlify.
-
-## Project structure
+## Repository layout
 
 ```text
-src/
-  components/     HeroAnimation, WaitlistForm, ShareOnX, …
-  pages/          LandingPage, PrivacyPage
-  lib/            supabase.ts, waitlist.ts
-  config/         site.ts (URL, X handle, contact)
-public/
-  og-image.svg    Source social card art → export to og-image.png
-docs/
-  LAUNCH.md       X + deploy checklist
-  supabase-setup.md
+platform/          ← Main product (Next.js 16, App Router)
+  src/app/         Pages + API routes
+  src/components/  Review UI, analysis, auth
+  src/lib/         AI pipeline, auth, data, export
+
+src/               Marketing landing page (Vite + React)
+supabase/          Shared migrations (waitlist + platform + auth)
+docs/              Launch playbooks
 ```
+
+## Product features
+
+- **Auth + roles** — Supabase Auth with owner / reviewer / viewer; invitation links
+- **Core loop** — Upload → classify → extract → review → analyze → export
+- **Review UX** — AI vs human badges, bulk approve high-confidence fields
+- **Analysis** — Severity-ranked flags, source citations, copy-paste CRM block
+- **Batch** — Process all pending documents at once
+- **Versioning** — Analysis history with diff vs previous run
+- **Export** — CSV (extractions) and HTML report (analysis)
+
+## Docs
+
+- [platform/README.md](platform/README.md) — Product setup and architecture
+- [docs/LAUNCH.md](docs/LAUNCH.md) — Marketing launch checklist
+- [docs/supabase-setup.md](docs/supabase-setup.md) — Supabase configuration
 
 ## License
 
