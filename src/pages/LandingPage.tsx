@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ClipboardCheck,
@@ -165,6 +166,7 @@ const trustBullets = [
 
 export const LandingPage = () => {
   const reduceMotion = usePrefersReducedMotion()
+  const [heroRemotionActive, setHeroRemotionActive] = useState(reduceMotion)
   const navScrolled = useScrolledPast(48)
 
   return (
@@ -218,9 +220,16 @@ export const LandingPage = () => {
             }
           >
             <div className="hero__animation-inner">
-              <HeroMotionFallback />
-              <div className="hero__remotion-layer">
-                <HeroPlayer reduceMotion={reduceMotion} />
+              <HeroMotionFallback active={!heroRemotionActive && !reduceMotion} />
+              <div
+                className={`hero__remotion-layer${
+                  heroRemotionActive ? ' hero__remotion-layer--active' : ''
+                }`}
+              >
+                <HeroPlayer
+                  reduceMotion={reduceMotion}
+                  onPlayingChange={setHeroRemotionActive}
+                />
               </div>
             </div>
             <div className="hero__animation-veil" />

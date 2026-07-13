@@ -351,14 +351,27 @@ h3 {
   position: absolute;
   inset: 0;
   z-index: 2;
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
 
-/* CSS motion fallback — always animates on Vercel/static hosts */
+.hero__remotion-layer--active {
+  opacity: 1;
+}
+
+/* CSS motion fallback — visible when Remotion autoplay fails on static hosts */
 .hero-motion-fallback {
   position: absolute;
   inset: 0;
   z-index: 1;
   font-family: 'Inter', system-ui, sans-serif;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.hero-motion-fallback--active {
+  z-index: 3;
+  opacity: 1;
 }
 
 .hero-motion-fallback__panel {
@@ -428,6 +441,30 @@ h3 {
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.08em;
+}
+
+.hero-motion-fallback__status {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 18px);
+  width: 200px;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(143, 153, 168, 0.9);
+}
+
+.hero-motion-fallback__dot {
+  animation: heroDotBlink 1.2s ease-in-out infinite;
+  opacity: 0.2;
+}
+
+@keyframes heroDotBlink {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
 }
 
 .hero-motion-fallback__field {
