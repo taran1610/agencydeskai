@@ -30,16 +30,5 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: {
       include: ['remotion', '@remotion/player'],
     },
-    build: {
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('remotion') || id.includes('@remotion')) {
-              return 'remotion'
-            }
-          },
-        },
-      },
-    },
   }
 })

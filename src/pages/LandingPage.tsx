@@ -17,6 +17,7 @@ import {
   Database,
   Upload,
 } from 'lucide-react'
+import { HeroMotionFallback } from '../components/HeroMotionFallback'
 import { HeroPlayer } from '../components/HeroPlayer'
 import { WaitlistForm } from '../components/WaitlistForm'
 import { SeoHead } from '../components/SeoHead'
@@ -217,7 +218,10 @@ export const LandingPage = () => {
             }
           >
             <div className="hero__animation-inner">
-              <HeroPlayer reduceMotion={reduceMotion} />
+              <HeroMotionFallback />
+              <div className="hero__remotion-layer">
+                <HeroPlayer reduceMotion={reduceMotion} />
+              </div>
             </div>
             <div className="hero__animation-veil" />
           </div>

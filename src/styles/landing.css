@@ -334,6 +334,179 @@ h3 {
   pointer-events: none;
 }
 
+.hero__animation-inner {
+  position: absolute;
+  top: 50%;
+  left: 58%;
+  width: min(1480px, 105%);
+  min-height: 420px;
+  aspect-ratio: 12 / 7;
+  transform: translate(-50%, -50%);
+  opacity: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero__remotion-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+/* CSS motion fallback — always animates on Vercel/static hosts */
+.hero-motion-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.hero-motion-fallback__panel {
+  position: absolute;
+  top: 14%;
+  width: 28%;
+  min-width: 200px;
+  padding: 16px;
+  border: 1px solid rgba(216, 222, 232, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.hero-motion-fallback__panel--left {
+  left: 4%;
+}
+
+.hero-motion-fallback__panel--right {
+  right: 4%;
+}
+
+.hero-motion-fallback__label {
+  margin-bottom: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: rgba(143, 153, 168, 0.9);
+}
+
+.hero-motion-fallback__card {
+  margin-bottom: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #e6eaf0;
+  color: #0c1014;
+  font-size: 14px;
+  font-weight: 600;
+  animation: heroCardBob 3.2s ease-in-out infinite;
+}
+
+.hero-motion-fallback__processor {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 120px;
+  height: 120px;
+  transform: translate(-50%, -50%);
+}
+
+.hero-motion-fallback__ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(216, 222, 232, 0.25);
+  border-radius: 50%;
+  animation: heroRingPulse 2.4s ease-out infinite;
+}
+
+.hero-motion-fallback__core {
+  position: absolute;
+  inset: 22%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(216, 222, 232, 0.12);
+  color: #d8dee8;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.hero-motion-fallback__field {
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(216, 222, 232, 0.08);
+  animation: heroFieldIn 4s ease-in-out infinite;
+  opacity: 0.4;
+}
+
+.hero-motion-fallback__field--flag {
+  border-color: rgba(251, 191, 36, 0.35);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.hero-motion-fallback__field-k {
+  display: block;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(143, 153, 168, 0.9);
+}
+
+.hero-motion-fallback__field-v {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #e6eaf0;
+}
+
+.hero-motion-fallback__ghost {
+  position: absolute;
+  left: 22%;
+  top: 38%;
+  width: 48px;
+  height: 60px;
+  border-radius: 4px;
+  background: #d8dee8;
+  opacity: 0;
+  animation: heroGhostFly 7.2s ease-in-out infinite;
+}
+
+@keyframes heroCardBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes heroRingPulse {
+  0% { transform: scale(0.92); opacity: 0.35; }
+  50% { transform: scale(1.08); opacity: 0.85; }
+  100% { transform: scale(0.92); opacity: 0.35; }
+}
+
+@keyframes heroFieldIn {
+  0%, 15% { opacity: 0.25; transform: translateX(8px); }
+  35%, 70% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0.25; transform: translateX(8px); }
+}
+
+@keyframes heroGhostFly {
+  0%, 8% { opacity: 0; transform: translate(0, 0) scale(1); }
+  12% { opacity: 0.85; }
+  45% { opacity: 0.7; transform: translate(180px, -20px) scale(0.55); }
+  55%, 100% { opacity: 0; transform: translate(220px, -30px) scale(0.4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-motion-fallback__card,
+  .hero-motion-fallback__ring,
+  .hero-motion-fallback__field,
+  .hero-motion-fallback__ghost {
+    animation: none;
+  }
+}
+
 .hero__animation-skeleton {
   width: 100%;
   height: 100%;
@@ -344,16 +517,17 @@ h3 {
 .hero__animation-veil {
   position: absolute;
   inset: 0;
+  z-index: 3;
   background:
     linear-gradient(
       90deg,
       rgba(7, 9, 12, 0.97) 0%,
-      rgba(7, 9, 12, 0.9) 28%,
-      rgba(7, 9, 12, 0.45) 48%,
-      rgba(7, 9, 12, 0.12) 72%,
-      rgba(7, 9, 12, 0.2) 100%
+      rgba(7, 9, 12, 0.88) 26%,
+      rgba(7, 9, 12, 0.35) 46%,
+      rgba(7, 9, 12, 0.05) 68%,
+      rgba(7, 9, 12, 0.12) 100%
     ),
-    linear-gradient(180deg, rgba(7, 9, 12, 0.45), transparent 38%, rgba(7, 9, 12, 0.82));
+    linear-gradient(180deg, rgba(7, 9, 12, 0.4), transparent 40%, rgba(7, 9, 12, 0.75));
   pointer-events: none;
 }
 
