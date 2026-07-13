@@ -49,13 +49,20 @@ export function OAuthButtons() {
     setError(null)
     try {
       const supabase = createClient()
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback`,
         },
       })
       if (oauthError) throw oauthError
+      if (!data?.url) {
+        throw new Error(
+          `Could not start ${provider} sign-in. Enable ${provider} under Supabase → Authentication → Providers.`,
+        )
+      }
+      // Must redirect manually — otherwise the button appears to do nothing.
+      window.location.href = data.url
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign-in failed')
       setBusy(null)
@@ -76,7 +83,11 @@ export function OAuthButtons() {
           {busy === p.id ? 'Redirecting…' : p.label}
         </button>
       ))}
-      {error && <p className="text-center text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700">
+          {error}
+        </p>
+      )}
       <p className="text-center text-[11px] text-slate-400">
         Google &amp; Apple require enabling providers in your Supabase project
         (Authentication → Providers).

@@ -26,16 +26,18 @@ export function LoginForm({
   const [error, setError] = useState<string | null>(
     authError === 'auth' ? 'Sign-in was cancelled or failed. Try again.' : null,
   )
+  const [notice, setNotice] = useState<string | null>(null)
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault()
     setBusy(true)
     setError(null)
+    setNotice(null)
     const supabase = createClient()
 
     try {
       if (mode === 'signup') {
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -46,6 +48,13 @@ export function LoginForm({
           },
         })
         if (signUpError) throw signUpError
+        if (data.user && !data.session) {
+          setNotice(
+            'Account created. If email confirmation is enabled in Supabase, check your inbox first — then sign in.',
+          )
+          setMode('signin')
+          return
+        }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
@@ -146,7 +155,16 @@ export function LoginForm({
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+        {notice && (
+          <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+            {notice}
+          </p>
+        )}
         <button
           type="submit"
           disabled={busy}
