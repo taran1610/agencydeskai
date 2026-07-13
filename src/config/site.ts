@@ -9,6 +9,13 @@ const siteUrl = trimTrailingSlash(
 
 const xHandleRaw = (import.meta.env.VITE_X_HANDLE || '').replace(/^@/, '')
 
+const appUrl = trimTrailingSlash(
+  import.meta.env.VITE_APP_URL ||
+    (import.meta.env.PROD
+      ? 'https://agencydeskai-app.vercel.app'
+      : 'http://localhost:3000'),
+)
+
 export const site = {
   name: 'AgencyDesk AI',
   tagline: 'AI operations for insurance brokers',
@@ -23,7 +30,9 @@ export const site = {
   contactEmail: import.meta.env.VITE_CONTACT_EMAIL || CONTACT_EMAIL,
   plausibleDomain: import.meta.env.VITE_PLAUSIBLE_DOMAIN || '',
   /** Operations console (Next.js app in platform/) */
-  appUrl: trimTrailingSlash(import.meta.env.VITE_APP_URL || 'http://localhost:3000'),
+  appUrl,
+  /** Sign-in page on the operations console */
+  loginUrl: `${appUrl}/login`,
 } as const
 
 export const xShareUrl = (text: string) => {

@@ -196,7 +196,7 @@ export const LandingPage = () => {
             <a href="#how-it-works">How it works</a>
             <a href="#for-brokers">Who it&rsquo;s for</a>
             <a href="#trust">Trust</a>
-            <a href={site.appUrl} className="nav__signin">
+            <a href={site.loginUrl} className="nav__signin">
               Sign in
             </a>
             <a href={site.appUrl} className="nav__cta">
