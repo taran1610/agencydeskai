@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 import { AlertCircle, FileText, FolderOpen, Users } from 'lucide-react'
 import { GettingStarted } from '@/components/GettingStarted'
 import { NewAccountForm } from '@/components/NewAccountForm'
-import { getAuthContext } from '@/lib/auth/session'
+import { NoWorkspaceAccess } from '@/components/NoWorkspaceAccess'
+import { getAuthContext, getSignedInUser } from '@/lib/auth/session'
 import { canWrite } from '@/lib/auth/permissions'
 import { listAccounts, summarizeWorkspace } from '@/lib/data'
 import { isSupabaseConfigured } from '@/lib/supabase/admin'
@@ -21,7 +22,13 @@ export default async function DashboardPage() {
   }
 
   const auth = await getAuthContext()
-  if (!auth) redirect('/login')
+  if (!auth) {
+    const user = await getSignedInUser()
+    if (user) {
+      return <NoWorkspaceAccess email={user.email} />
+    }
+    redirect('/login')
+  }
 
   const accounts = await listAccounts(auth.workspaceId)
   const stats = summarizeWorkspace(accounts)

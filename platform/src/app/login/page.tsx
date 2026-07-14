@@ -4,7 +4,8 @@ import { redirect } from 'next/navigation'
 import { FileSearch } from 'lucide-react'
 import { LoginForm } from '@/components/LoginForm'
 import { MARKETING_URL } from '@/config/urls'
-import { getAuthContext } from '@/lib/auth/session'
+import { NoWorkspaceAccess } from '@/components/NoWorkspaceAccess'
+import { getAuthContext, getSignedInUser } from '@/lib/auth/session'
 import { isSupabasePublicConfigured } from '@/lib/supabase/config'
 import { isSupabaseServerConfigured } from '@/lib/supabase/env'
 
@@ -12,6 +13,7 @@ export default async function LoginPage() {
   const publicConfigured = isSupabasePublicConfigured()
   const serverReady = isSupabaseServerConfigured()
   const auth = publicConfigured ? await getAuthContext() : null
+  const signedInUser = publicConfigured && !auth ? await getSignedInUser() : null
 
   if (auth && serverReady) {
     redirect('/')
@@ -36,15 +38,17 @@ export default async function LoginPage() {
             <strong>agencydeskai-app</strong> Vercel project, then redeploy.
           </p>
         </div>
-      ) : auth && !serverReady ? (
+      ) : signedInUser && !serverReady ? (
         <div className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-700 shadow-sm">
-          <p className="font-medium text-slate-900">Signed in as {auth.email}</p>
+          <p className="font-medium text-slate-900">Signed in as {signedInUser.email}</p>
           <p className="mt-2 text-slate-600">
             The dashboard needs <code className="rounded bg-slate-100 px-1">SUPABASE_SERVICE_ROLE_KEY</code>{' '}
             added in Vercel → <strong>agencydeskai-app</strong> → Environment Variables, then
             redeploy.
           </p>
         </div>
+      ) : signedInUser ? (
+        <NoWorkspaceAccess email={signedInUser.email} />
       ) : (
         <Suspense fallback={<p className="text-center text-sm text-slate-500">Loading…</p>}>
           <LoginForm />

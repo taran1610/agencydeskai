@@ -10,12 +10,10 @@ export interface AuthContext {
 }
 
 export async function getAuthContext(): Promise<AuthContext | null> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user?.email) return null
+  const user = await getSignedInUser()
+  if (!user) return null
 
+  const supabase = await createClient()
   const { data: membership } = await supabase
     .from('workspace_members')
     .select('workspace_id, role')
@@ -31,6 +29,15 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     workspaceId: membership.workspace_id,
     role: membership.role as UserRole,
   }
+}
+
+export async function getSignedInUser(): Promise<{ id: string; email: string } | null> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user?.email) return null
+  return { id: user.id, email: user.email }
 }
 
 export async function requireAuth(minRole: UserRole = 'viewer'): Promise<AuthContext | NextResponse> {

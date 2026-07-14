@@ -1,6 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { isSupabaseServerConfigured } from '@/lib/supabase/env'
 
 const PUBLIC_PATHS = ['/login', '/invite', '/api/auth']
 
@@ -43,12 +42,6 @@ export async function updateSession(request: NextRequest) {
     loginUrl.pathname = '/login'
     loginUrl.searchParams.set('next', pathname)
     return NextResponse.redirect(loginUrl)
-  }
-
-  if (user && pathname === '/login' && isSupabaseServerConfigured()) {
-    const home = request.nextUrl.clone()
-    home.pathname = '/'
-    return NextResponse.redirect(home)
   }
 
   return response
