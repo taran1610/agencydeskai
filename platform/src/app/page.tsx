@@ -100,6 +100,8 @@ export default async function DashboardPage() {
         <DocumentTypesPanel types={insights.documentTypes} totalDocuments={stats.documentCount} />
       </div>
 
+      <div id="integrations" className="scroll-mt-20" aria-hidden />
+
       <AccountsGrid accounts={accounts} canCreate={canCreate} />
     </div>
   )

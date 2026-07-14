@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import {
   BarChart3,
   Bot,
@@ -19,16 +20,27 @@ import type { UserRole } from '@/lib/auth/permissions'
 import { ROLE_LABELS } from '@/lib/auth/permissions'
 
 const NAV = [
-  { href: '/', label: 'Overview', icon: LayoutDashboard, exact: true },
-  { href: '/#accounts', label: 'Client accounts', icon: Users },
-  { href: '/#documents', label: 'Documents', icon: FileText },
-  { href: '/#processing', label: 'Processing', icon: Sparkles },
-  { href: '/#review', label: 'Review & approval', icon: UserCheck },
-  { href: '/#exports', label: 'CRM & exports', icon: Database },
-  { href: '/#analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/#integrations', label: 'Integrations', icon: Plug },
-  { href: '/settings/team', label: 'Settings', icon: Settings, ownerOnly: true },
+  { href: '/', label: 'Overview', icon: LayoutDashboard, section: null },
+  { href: '/#accounts', label: 'Client accounts', icon: Users, section: 'accounts' },
+  { href: '/#documents', label: 'Documents', icon: FileText, section: 'documents' },
+  { href: '/#processing', label: 'Processing', icon: Sparkles, section: 'processing' },
+  { href: '/#review', label: 'Review & approval', icon: UserCheck, section: 'review' },
+  { href: '/#exports', label: 'CRM & exports', icon: Database, section: 'exports' },
+  { href: '/#analytics', label: 'Analytics', icon: BarChart3, section: 'analytics' },
+  { href: '/#integrations', label: 'Integrations', icon: Plug, section: 'integrations' },
+  {
+    href: '/settings/team',
+    label: 'Settings',
+    icon: Settings,
+    section: 'settings',
+    ownerOnly: true,
+  },
 ] as const
+
+function readHash() {
+  if (typeof window === 'undefined') return ''
+  return window.location.hash.replace('#', '')
+}
 
 export function ConsoleSidebar({
   email,
@@ -42,6 +54,20 @@ export function ConsoleSidebar({
   hasAiKey: boolean
 }) {
   const pathname = usePathname()
+  const [hash, setHash] = useState(readHash)
+
+  useEffect(() => {
+    const syncHash = () => setHash(readHash())
+    syncHash()
+    window.addEventListener('hashchange', syncHash)
+    return () => window.removeEventListener('hashchange', syncHash)
+  }, [])
+
+  // Sync hash when navigating back to dashboard without full reload
+  useEffect(() => {
+    setHash(readHash())
+  }, [pathname])
+
   const name = displayName ?? email.split('@')[0] ?? 'User'
   const initials = name
     .split(/\s+/)
@@ -50,10 +76,17 @@ export function ConsoleSidebar({
     .slice(0, 2)
     .toUpperCase()
 
-  function isActive(href: string, exact?: boolean) {
-    if (href.startsWith('/#')) return pathname === '/'
-    if (exact) return pathname === href
-    return pathname === href || pathname.startsWith(`${href}/`)
+  function isActive(item: (typeof NAV)[number]) {
+    if (item.href === '/settings/team') {
+      return pathname.startsWith('/settings')
+    }
+    if (pathname.startsWith('/accounts/') && item.section === 'accounts') {
+      return true
+    }
+    if (pathname !== '/') return false
+
+    if (item.section === null) return hash === ''
+    return hash === item.section
   }
 
   return (
@@ -74,11 +107,18 @@ export function ConsoleSidebar({
         {NAV.filter((item) => !('ownerOnly' in item && item.ownerOnly) || role === 'owner').map(
           (item) => {
             const Icon = item.icon
-            const active = isActive(item.href, 'exact' in item ? item.exact : false)
+            const active = isActive(item)
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => {
+                  if (item.section !== null && pathname === '/') {
+                    setHash(item.section)
+                  } else if (item.section === null) {
+                    setHash('')
+                  }
+                }}
                 className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
                   active
                     ? 'bg-black text-white'
@@ -110,6 +150,7 @@ export function ConsoleSidebar({
           </p>
           <Link
             href="/#processing"
+            onClick={() => setHash('processing')}
             className="mt-2 inline-block text-[11px] font-semibold text-black underline"
           >
             View settings
