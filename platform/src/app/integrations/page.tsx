@@ -2,6 +2,7 @@ import { NoWorkspaceAccess } from '@/components/NoWorkspaceAccess'
 import { PageHeader } from '@/components/console/PageHeader'
 import { IntegrationsPanel } from '@/components/sections/IntegrationsPanel'
 import { hasAiConfigured, requireConsolePage } from '@/lib/console-page'
+import { isStripeConfigured } from '@/lib/stripe/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +21,7 @@ export default async function IntegrationsPage() {
         title="Integrations"
         description="Connect AI providers, authentication, and future AMS/CRM systems to your workspace."
       />
-      <IntegrationsPanel hasAiKey={hasAiConfigured()} />
+      <IntegrationsPanel hasAiKey={hasAiConfigured()} hasStripe={isStripeConfigured()} />
     </div>
   )
 }

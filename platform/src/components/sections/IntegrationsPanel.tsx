@@ -1,7 +1,13 @@
 import Link from 'next/link'
 import { Check, Plug, X } from 'lucide-react'
 
-export function IntegrationsPanel({ hasAiKey }: { hasAiKey: boolean }) {
+export function IntegrationsPanel({
+  hasAiKey,
+  hasStripe = false,
+}: {
+  hasAiKey: boolean
+  hasStripe?: boolean
+}) {
   const integrations = [
     {
       name: 'Supabase',
@@ -22,6 +28,14 @@ export function IntegrationsPanel({ hasAiKey }: { hasAiKey: boolean }) {
       description: 'Sign in with Google for your team members.',
       status: 'optional' as const,
       detail: 'Enable under Supabase → Authentication → Providers.',
+    },
+    {
+      name: 'Stripe Billing',
+      description: 'B2B subscription billing, invoicing, and tax collection for agency workspaces.',
+      status: hasStripe ? ('connected' as const) : ('disconnected' as const),
+      detail: hasStripe
+        ? 'Checkout, Customer Portal, and webhooks configured for AgencyDesk Pro subscriptions.'
+        : 'Add STRIPE_SECRET_KEY, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, and STRIPE_PRICE_ID in Vercel.',
     },
     {
       name: 'Applied Epic / AMS',

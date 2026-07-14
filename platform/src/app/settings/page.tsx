@@ -1,9 +1,13 @@
+import { Suspense } from 'react'
 import { NoWorkspaceAccess } from '@/components/NoWorkspaceAccess'
+import { BillingPanel } from '@/components/BillingPanel'
 import { PageHeader } from '@/components/console/PageHeader'
 import { TeamInviteForm } from '@/components/TeamInviteForm'
 import { hasAiConfigured, requireConsolePage } from '@/lib/console-page'
 import { ROLE_LABELS } from '@/lib/auth/permissions'
 import { listPendingInvitations, listTeamMembers } from '@/lib/data'
+import { getWorkspaceBilling } from '@/lib/stripe/billing'
+import { isStripeConfigured } from '@/lib/stripe/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,12 +19,11 @@ export default async function SettingsPage() {
   const { auth } = result
 
   const isOwner = auth.role === 'owner'
-  const [members, invitations] = isOwner
-    ? await Promise.all([
-        listTeamMembers(auth.workspaceId),
-        listPendingInvitations(auth.workspaceId),
-      ])
-    : [[], []]
+  const [members, invitations, billing] = await Promise.all([
+    isOwner ? listTeamMembers(auth.workspaceId) : Promise.resolve([]),
+    isOwner ? listPendingInvitations(auth.workspaceId) : Promise.resolve([]),
+    getWorkspaceBilling(auth.workspaceId),
+  ])
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-6">
@@ -28,7 +31,7 @@ export default async function SettingsPage() {
         role={auth.role}
         section="Settings"
         title="Workspace settings"
-        description="Manage your profile, team access, and platform configuration."
+        description="Manage your profile, billing, team access, and platform configuration."
       />
 
       <section className="dash-card p-5">
@@ -44,6 +47,14 @@ export default async function SettingsPage() {
           </div>
         </dl>
       </section>
+
+      <Suspense fallback={null}>
+        <BillingPanel
+          billing={billing}
+          stripeConfigured={isStripeConfigured()}
+          isOwner={isOwner}
+        />
+      </Suspense>
 
       <section className="dash-card p-5">
         <h2 className="text-sm font-semibold text-black">AI processing</h2>

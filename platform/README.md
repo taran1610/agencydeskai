@@ -18,7 +18,14 @@ The main product: an AI operations teammate for insurance agencies.
    | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → API |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → API |
    | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → API (secret) |
-   | `ANTHROPIC_API_KEY` | console.anthropic.com |
+   | `OPENAI_API_KEY` | platform.openai.com (or use `ANTHROPIC_API_KEY` instead) |
+   | `STRIPE_SECRET_KEY` | Stripe Dashboard → Developers → API keys |
+   | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key |
+   | `STRIPE_PRICE_ID` | Run `npx tsx scripts/stripe-setup.ts` or create in Dashboard |
+   | `STRIPE_WEBHOOK_SECRET` | Stripe webhook → `/api/webhooks/stripe` |
+   | `NEXT_PUBLIC_APP_URL` | `https://agencydeskai-app.vercel.app` |
+
+See [docs/STRIPE.md](docs/STRIPE.md) for billing setup (subscriptions, invoicing, tax).
 
 5. Redeploy after adding env vars.
 

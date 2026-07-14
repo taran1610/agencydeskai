@@ -21,7 +21,7 @@ function candidates(): ModelCandidate[] {
   }
   if (list.length === 0) {
     throw new Error(
-      'No AI provider configured. Set ANTHROPIC_API_KEY and/or OPENAI_API_KEY in platform/.env.local.',
+      'No AI provider configured. Add OPENAI_API_KEY or ANTHROPIC_API_KEY in the agencydeskai-app Vercel project (Settings → Environment Variables), then redeploy.',
     )
   }
   return list

@@ -1,0 +1,151 @@
+import { supabaseAdmin } from '@/lib/supabase/admin'
+import { APP_URL, getStripe, getStripePriceId } from '@/lib/stripe/client'
+import type { WorkspaceBilling } from '@/lib/stripe/status'
+import { isSubscriptionActive } from '@/lib/stripe/status'
+
+export type { WorkspaceBilling }
+export { isSubscriptionActive }
+
+export async function getWorkspaceBilling(
+  workspaceId: string,
+): Promise<WorkspaceBilling | null> {
+  const { data, error } = await supabaseAdmin()
+    .from('workspaces')
+    .select(
+      'id, name, stripe_customer_id, stripe_subscription_id, subscription_status, subscription_plan, subscription_current_period_end',
+    )
+    .eq('id', workspaceId)
+    .single()
+  if (error || !data) return null
+  return data as WorkspaceBilling
+}
+
+export async function getOrCreateStripeCustomer(
+  workspace: WorkspaceBilling,
+  email: string,
+): Promise<string> {
+  if (workspace.stripe_customer_id) return workspace.stripe_customer_id
+
+  const stripe = getStripe()
+  const customer = await stripe.customers.create({
+    email,
+    name: workspace.name,
+    metadata: {
+      workspace_id: workspace.id,
+    },
+  })
+
+  const { error } = await supabaseAdmin()
+    .from('workspaces')
+    .update({ stripe_customer_id: customer.id })
+    .eq('id', workspace.id)
+  if (error) throw new Error(error.message)
+
+  return customer.id
+}
+
+export async function createCheckoutSession(options: {
+  workspaceId: string
+  email: string
+  userId: string
+}) {
+  const workspace = await getWorkspaceBilling(options.workspaceId)
+  if (!workspace) throw new Error('Workspace not found')
+
+  const customerId = await getOrCreateStripeCustomer(workspace, options.email)
+  const stripe = getStripe()
+
+  const session = await stripe.checkout.sessions.create({
+    mode: 'subscription',
+    customer: customerId,
+    line_items: [{ price: getStripePriceId(), quantity: 1 }],
+    success_url: `${APP_URL}/settings?billing=success`,
+    cancel_url: `${APP_URL}/settings?billing=canceled`,
+    client_reference_id: workspace.id,
+    metadata: {
+      workspace_id: workspace.id,
+      user_id: options.userId,
+    },
+    subscription_data: {
+      metadata: {
+        workspace_id: workspace.id,
+      },
+    },
+    automatic_tax: { enabled: true },
+    customer_update: {
+      address: 'auto',
+      name: 'auto',
+    },
+    billing_address_collection: 'required',
+    tax_id_collection: { enabled: true },
+    allow_promotion_codes: true,
+  })
+
+  if (!session.url) throw new Error('Could not create checkout session')
+  return session.url
+}
+
+export async function createBillingPortalSession(workspaceId: string) {
+  const workspace = await getWorkspaceBilling(workspaceId)
+  if (!workspace?.stripe_customer_id) {
+    throw new Error('No billing account yet. Subscribe first.')
+  }
+
+  const stripe = getStripe()
+  const session = await stripe.billingPortal.sessions.create({
+    customer: workspace.stripe_customer_id,
+    return_url: `${APP_URL}/settings`,
+  })
+
+  return session.url
+}
+
+export async function syncSubscriptionToWorkspace(
+  subscription: import('stripe').Stripe.Subscription,
+) {
+  const workspaceId = subscription.metadata.workspace_id
+  if (!workspaceId) return
+
+  const status = subscription.status
+  const plan =
+    subscription.items.data[0]?.price?.nickname ??
+    subscription.items.data[0]?.price?.id ??
+    'pro'
+
+  const periodEnd = subscription.items.data[0]?.current_period_end
+
+  await supabaseAdmin()
+    .from('workspaces')
+    .update({
+      stripe_subscription_id: subscription.id,
+      subscription_status: mapSubscriptionStatus(status),
+      subscription_plan: plan,
+      subscription_current_period_end: periodEnd
+        ? new Date(periodEnd * 1000).toISOString()
+        : null,
+    })
+    .eq('id', workspaceId)
+}
+
+function mapSubscriptionStatus(status: string): string {
+  const allowed = [
+    'trialing',
+    'active',
+    'past_due',
+    'canceled',
+    'unpaid',
+    'incomplete',
+  ] as const
+  if (allowed.includes(status as (typeof allowed)[number])) return status
+  return 'none'
+}
+
+export async function markWorkspaceSubscriptionCanceled(subscriptionId: string) {
+  await supabaseAdmin()
+    .from('workspaces')
+    .update({
+      subscription_status: 'canceled',
+      stripe_subscription_id: null,
+    })
+    .eq('stripe_subscription_id', subscriptionId)
+}

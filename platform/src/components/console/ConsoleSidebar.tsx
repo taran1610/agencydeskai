@@ -106,7 +106,7 @@ export function ConsoleSidebar({
           <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--gray-500)]">
             {hasAiKey
               ? 'Documents will be classified and extracted automatically.'
-              : 'Add ANTHROPIC_API_KEY in Vercel to enable live processing.'}
+              : 'Add OPENAI_API_KEY or ANTHROPIC_API_KEY in Vercel (agencydeskai-app), then redeploy.'}
           </p>
           <Link
             href="/integrations"
