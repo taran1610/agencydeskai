@@ -1,11 +1,10 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { isSupabaseServerConfigured } from '@/lib/supabase/env'
 
 let cached: SupabaseClient | null = null
 
 export function isSupabaseConfigured(): boolean {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  return Boolean(url && serviceKey)
+  return isSupabaseServerConfigured()
 }
 
 /**

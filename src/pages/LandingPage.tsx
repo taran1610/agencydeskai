@@ -155,7 +155,7 @@ export const LandingPage = () => {
             <a href={site.loginUrl} className="nav__signin">
               Sign in
             </a>
-            <a href={site.appUrl} className="nav__cta">
+            <a href={site.loginUrl} className="nav__cta">
               Launch console
             </a>
           </div>
@@ -178,7 +178,7 @@ export const LandingPage = () => {
                   more clients with less manual work.
                 </p>
                 <div className="hero__actions">
-                  <a href={site.appUrl} className="btn btn--primary">
+                  <a href={site.loginUrl} className="btn btn--primary">
                     Launch console
                   </a>
                   <a href="#beta" className="btn btn--outline">

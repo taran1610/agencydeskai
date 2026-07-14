@@ -1,12 +1,21 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { FileSearch } from 'lucide-react'
 import { LoginForm } from '@/components/LoginForm'
 import { MARKETING_URL } from '@/config/urls'
+import { getAuthContext } from '@/lib/auth/session'
 import { isSupabasePublicConfigured } from '@/lib/supabase/config'
+import { isSupabaseServerConfigured } from '@/lib/supabase/env'
 
-export default function LoginPage() {
-  const configured = isSupabasePublicConfigured()
+export default async function LoginPage() {
+  const publicConfigured = isSupabasePublicConfigured()
+  const serverReady = isSupabaseServerConfigured()
+  const auth = publicConfigured ? await getAuthContext() : null
+
+  if (auth && serverReady) {
+    redirect('/')
+  }
 
   return (
     <div className="mx-auto flex min-h-[75vh] w-full max-w-md flex-col justify-center px-4">
@@ -18,18 +27,23 @@ export default function LoginPage() {
         <p className="mt-1 text-sm text-slate-500">Sign in to your operations console</p>
       </div>
 
-      {!configured ? (
+      {!publicConfigured ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
           <p className="font-medium">Supabase not configured on Vercel</p>
           <p className="mt-2 text-amber-900/80">
-            Add <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_URL</code>,{' '}
-            <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, and{' '}
-            <code className="rounded bg-amber-100 px-1">SUPABASE_SERVICE_ROLE_KEY</code> in the{' '}
+            Add <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_URL</code> and{' '}
+            <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> in the{' '}
             <strong>agencydeskai-app</strong> Vercel project, then redeploy.
           </p>
-          <Link href="/" className="mt-4 inline-block text-sm font-medium underline">
-            View setup checklist
-          </Link>
+        </div>
+      ) : auth && !serverReady ? (
+        <div className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-700 shadow-sm">
+          <p className="font-medium text-slate-900">Signed in as {auth.email}</p>
+          <p className="mt-2 text-slate-600">
+            The dashboard needs <code className="rounded bg-slate-100 px-1">SUPABASE_SERVICE_ROLE_KEY</code>{' '}
+            added in Vercel → <strong>agencydeskai-app</strong> → Environment Variables, then
+            redeploy.
+          </p>
         </div>
       ) : (
         <Suspense fallback={<p className="text-center text-sm text-slate-500">Loading…</p>}>

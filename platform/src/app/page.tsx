@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { AlertCircle, FileText, FolderOpen, Users } from 'lucide-react'
 import { GettingStarted } from '@/components/GettingStarted'
 import { NewAccountForm } from '@/components/NewAccountForm'
-import { APP_URL, MARKETING_URL } from '@/config/urls'
 import { getAuthContext } from '@/lib/auth/session'
 import { canWrite } from '@/lib/auth/permissions'
 import { listAccounts, summarizeWorkspace } from '@/lib/data'
@@ -18,56 +17,7 @@ function hasAiConfigured() {
 
 export default async function DashboardPage() {
   if (!isSupabaseConfigured()) {
-    return (
-      <div className="mx-auto max-w-2xl space-y-6">
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-8">
-          <h1 className="text-xl font-semibold text-amber-950">
-            Finish Supabase setup on Vercel
-          </h1>
-          <p className="mt-2 text-sm text-amber-900/80">
-            Production is live at{' '}
-            <a href={APP_URL} className="font-medium underline">
-              {APP_URL.replace('https://', '')}
-            </a>
-            , but the console still needs server-side Supabase credentials in your Vercel
-            project.
-          </p>
-          <ol className="mt-6 list-decimal space-y-3 pl-5 text-sm text-amber-950/90">
-            <li>
-              In Supabase → <strong>Project Settings → API</strong>, copy the{' '}
-              <strong>service_role</strong> key (secret).
-            </li>
-            <li>
-              In Vercel → project <strong>agencydeskai-app</strong> →{' '}
-              <strong>Settings → Environment Variables</strong>, add{' '}
-              <code className="rounded bg-amber-100 px-1">SUPABASE_SERVICE_ROLE_KEY</code>{' '}
-              for Production.
-            </li>
-            <li>
-              Add <code className="rounded bg-amber-100 px-1">ANTHROPIC_API_KEY</code>{' '}
-              (or OpenAI) for document processing.
-            </li>
-            <li>
-              Run both SQL files in{' '}
-              <code className="rounded bg-amber-100 px-1">supabase/migrations/</code> in the
-              Supabase SQL editor.
-            </li>
-            <li>
-              In Supabase → <strong>Authentication → URL Configuration</strong>, set Site URL
-              to <code className="rounded bg-amber-100 px-1">{APP_URL}</code> and add redirect
-              URL <code className="rounded bg-amber-100 px-1">{APP_URL}/api/auth/callback</code>.
-            </li>
-            <li>Redeploy the Vercel project, then sign in at {APP_URL}/login.</li>
-          </ol>
-        </div>
-        <p className="text-center text-sm text-slate-500">
-          Marketing site:{' '}
-          <a href={MARKETING_URL} className="underline">
-            {MARKETING_URL.replace('https://', '')}
-          </a>
-        </p>
-      </div>
-    )
+    redirect('/login')
   }
 
   const auth = await getAuthContext()
