@@ -34,13 +34,13 @@ body {
   font-family:
     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     Helvetica, Arial, sans-serif;
-  background: #07090c;
-  color: #f4f6f8;
+  background: #f4f1ea;
+  color: #111111;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   line-height: 1.55;
-  font-size: 17px;
+  font-size: 16px;
   letter-spacing: -0.005em;
 }
 
@@ -59,6 +59,6 @@ button {
 }
 
 ::selection {
-  background: rgba(216, 222, 232, 0.28);
-  color: #f4f6f8;
+  background: rgba(17, 17, 17, 0.12);
+  color: #111111;
 }

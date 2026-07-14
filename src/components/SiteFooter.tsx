@@ -6,20 +6,26 @@ export const SiteFooter = () => (
     <div className="container footer__inner">
       <div className="footer__brand">
         <span className="brand__name">{site.name}</span>
-        <span className="footer__tag">{site.tagline}</span>
+        <p className="footer__tag">{site.tagline}</p>
+        <p className="footer__meta">
+          &copy; {new Date().getFullYear()} {site.name} &middot; Private beta
+        </p>
       </div>
-      <nav className="footer__links" aria-label="Footer">
+      <nav className="footer__col" aria-label="Product">
+        <span className="footer__col-label">Product</span>
+        <a href="/#features">What we do</a>
+        <a href="/#how-it-works">How it works</a>
+        <a href="/#trust">Trust</a>
+      </nav>
+      <nav className="footer__col" aria-label="Company">
+        <span className="footer__col-label">Company</span>
+        <a href="/#beta">Pilot access</a>
+        <a href={`mailto:${site.contactEmail}`}>Contact</a>
         <Link to="/privacy">Privacy</Link>
         <a href={site.appUrl}>Operations console</a>
-        <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>
-        {site.xUrl ? (
-          <a href={site.xUrl} target="_blank" rel="noopener noreferrer">
-            @{site.xHandle} on X
-          </a>
-        ) : null}
       </nav>
-      <div className="footer__meta">
-        © {new Date().getFullYear()} {site.name} · Private beta
+      <div className="footer__ref" aria-hidden>
+        REF. AD-026
       </div>
     </div>
   </footer>

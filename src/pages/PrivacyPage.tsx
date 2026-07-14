@@ -16,7 +16,7 @@ export const PrivacyPage = () => (
           <span className="brand__name">{site.name}</span>
         </Link>
         <Link to="/#beta" className="nav__cta">
-          Join beta
+          Join waitlist
         </Link>
       </div>
     </header>
