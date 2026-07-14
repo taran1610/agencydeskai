@@ -10,17 +10,7 @@ export function AccountsGrid({
   canCreate: boolean
 }) {
   return (
-    <section id="accounts">
-      <div className="mb-4 flex items-end justify-between gap-4">
-        <div>
-          <h2 className="text-sm font-semibold text-black">All accounts</h2>
-          <p className="text-xs text-[var(--gray-500)]">Workspace client accounts</p>
-        </div>
-        {accounts.length > 0 && (
-          <span className="text-xs font-medium text-[var(--gray-400)]">{accounts.length} total</span>
-        )}
-      </div>
-
+    <section>
       {accounts.length === 0 ? (
         <div className="dash-card border-dashed px-8 py-16 text-center">
           <FolderOpen className="mx-auto text-[var(--gray-300)]" size={36} strokeWidth={1.25} />

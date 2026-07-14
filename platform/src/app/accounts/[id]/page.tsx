@@ -35,8 +35,8 @@ export default async function AccountPage({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <Link
-            href="/"
-            className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800"
+            href="/accounts"
+            className="inline-flex items-center gap-1 text-xs text-[var(--gray-500)] hover:text-black"
           >
             <ArrowLeft size={13} /> All accounts
           </Link>

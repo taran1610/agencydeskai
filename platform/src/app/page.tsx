@@ -1,55 +1,27 @@
-import { redirect } from 'next/navigation'
-import { ChevronRight } from 'lucide-react'
-import { AccountsGrid } from '@/components/dashboard/AccountsGrid'
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
+import { NoWorkspaceAccess } from '@/components/NoWorkspaceAccess'
+import { PageHeader } from '@/components/console/PageHeader'
 import { ConfidenceOverview } from '@/components/dashboard/ConfidenceOverview'
 import { DashboardStats } from '@/components/dashboard/DashboardStats'
 import {
   GettingStartedCard,
   ProcessingPipeline,
 } from '@/components/dashboard/GettingStartedCard'
-import { DocumentTypesPanel } from '@/components/dashboard/DocumentTypesPanel'
 import { RecentActivity } from '@/components/dashboard/RecentActivity'
 import { DemoDataBanner } from '@/components/DemoDataBanner'
-import { NewAccountForm } from '@/components/NewAccountForm'
-import { NoWorkspaceAccess } from '@/components/NoWorkspaceAccess'
-import { getAuthContext, getSignedInUser } from '@/lib/auth/session'
-import { canWrite } from '@/lib/auth/permissions'
-import { ROLE_LABELS } from '@/lib/auth/permissions'
-import { ensureDemoDataForWorkspace } from '@/lib/demo/seed'
-import {
-  getWorkspaceDashboardInsights,
-  listAccounts,
-  summarizeWorkspace,
-} from '@/lib/data'
-import { isSupabaseConfigured } from '@/lib/supabase/admin'
+import { OverviewQuickNav } from '@/components/sections/OverviewQuickNav'
+import { hasAiConfigured, requireConsolePage } from '@/lib/console-page'
+import { getWorkspaceDashboardInsights, listAccounts, summarizeWorkspace } from '@/lib/data'
 
 export const dynamic = 'force-dynamic'
 
-function hasAiConfigured() {
-  return Boolean(process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY)
-}
-
-export default async function DashboardPage() {
-  if (!isSupabaseConfigured()) {
-    redirect('/login')
+export default async function OverviewPage() {
+  const result = await requireConsolePage()
+  if ('noWorkspace' in result) {
+    return <NoWorkspaceAccess email={result.noWorkspace} />
   }
-
-  const auth = await getAuthContext()
-  if (!auth) {
-    const user = await getSignedInUser()
-    if (user) {
-      return <NoWorkspaceAccess email={user.email} />
-    }
-    redirect('/login')
-  }
-
-  const canCreate = canWrite(auth.role)
-
-  try {
-    await ensureDemoDataForWorkspace(auth.workspaceId, auth.userId)
-  } catch (error) {
-    console.error('Demo seed skipped:', error)
-  }
+  const { auth, canCreate } = result
 
   const [accounts, insights] = await Promise.all([
     listAccounts(auth.workspaceId),
@@ -57,29 +29,16 @@ export default async function DashboardPage() {
   ])
   const stats = summarizeWorkspace(accounts)
   const hasDemo = accounts.some((a) => a.is_demo)
+  const featured = accounts.slice(0, 3)
 
   return (
     <div className="space-y-6 p-6">
-      {/* Breadcrumb + page header */}
-      <div className="flex flex-wrap items-start justify-between gap-6">
-        <div className="min-w-0 flex-1">
-          <nav className="flex items-center gap-1.5 text-xs text-[var(--gray-400)]">
-            <span className="font-medium text-[var(--gray-600)]">{ROLE_LABELS[auth.role]}</span>
-            <ChevronRight size={12} />
-            <span>Operations Console</span>
-          </nav>
-          <h1 className="console-title mt-2">Client accounts</h1>
-          <p className="console-lede">
-            Upload insurance documents, let the AI read and extract every field, review with your
-            team, then generate account summaries and CRM-ready updates.
-          </p>
-        </div>
-        {canCreate && (
-          <div id="exports" className="w-full sm:w-80">
-            <NewAccountForm />
-          </div>
-        )}
-      </div>
+      <PageHeader
+        role={auth.role}
+        section="Overview"
+        title="Operations overview"
+        description="A snapshot of your entire workspace — accounts, documents, processing status, and recent activity."
+      />
 
       <DemoDataBanner hasDemo={hasDemo} canManage={auth.role === 'owner'} />
 
@@ -94,15 +53,41 @@ export default async function DashboardPage() {
         <ProcessingPipeline />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-2">
         <RecentActivity items={insights.recentActivity} />
         <ConfidenceOverview confidence={insights.confidence} />
-        <DocumentTypesPanel types={insights.documentTypes} totalDocuments={stats.documentCount} />
       </div>
 
-      <div id="integrations" className="scroll-mt-20" aria-hidden />
+      {featured.length > 0 && (
+        <section className="dash-card">
+          <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4">
+            <h2 className="text-sm font-semibold text-black">Recent accounts</h2>
+            <Link href="/accounts" className="text-xs font-semibold text-black hover:underline">
+              View all
+            </Link>
+          </div>
+          <ul className="divide-y divide-[var(--border)]">
+            {featured.map((account) => (
+              <li key={account.id}>
+                <Link
+                  href={`/accounts/${account.id}`}
+                  className="flex items-center justify-between px-5 py-3 hover:bg-[var(--gray-50)]"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-black">{account.name}</p>
+                    <p className="text-xs text-[var(--gray-500)]">
+                      {account.documentCount} docs · {account.pendingReviewCount} to review
+                    </p>
+                  </div>
+                  <ArrowRight size={14} className="text-[var(--gray-400)]" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
-      <AccountsGrid accounts={accounts} canCreate={canCreate} />
+      <OverviewQuickNav />
     </div>
   )
 }

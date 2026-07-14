@@ -290,3 +290,157 @@ export async function listPendingInvitations(workspaceId: string): Promise<Invit
   if (error) throw new Error(error.message)
   return data ?? []
 }
+
+async function getWorkspaceAccountIds(workspaceId: string) {
+  const db = supabaseAdmin()
+  const { data: accounts } = await db
+    .from('accounts')
+    .select('id, name')
+    .eq('workspace_id', workspaceId)
+    .eq('status', 'active')
+  return accounts ?? []
+}
+
+export interface WorkspaceDocument extends DocumentRow {
+  account_name: string
+}
+
+export async function listWorkspaceDocuments(workspaceId: string): Promise<WorkspaceDocument[]> {
+  const accounts = await getWorkspaceAccountIds(workspaceId)
+  if (accounts.length === 0) return []
+
+  const accountIds = accounts.map((a) => a.id)
+  const nameMap = new Map(accounts.map((a) => [a.id, a.name]))
+  const db = supabaseAdmin()
+
+  const { data: documents, error } = await db
+    .from('documents')
+    .select('*')
+    .in('account_id', accountIds)
+    .order('created_at', { ascending: false })
+    .returns<DocumentRow[]>()
+  if (error) throw new Error(error.message)
+
+  return (documents ?? []).map((doc) => ({
+    ...doc,
+    account_name: nameMap.get(doc.account_id) ?? 'Unknown',
+  }))
+}
+
+export interface WorkspaceExtraction extends Extraction {
+  account_name: string
+  document_filename: string
+}
+
+export async function listPendingReviewExtractions(
+  workspaceId: string,
+): Promise<WorkspaceExtraction[]> {
+  const accounts = await getWorkspaceAccountIds(workspaceId)
+  if (accounts.length === 0) return []
+
+  const accountIds = accounts.map((a) => a.id)
+  const nameMap = new Map(accounts.map((a) => [a.id, a.name]))
+  const db = supabaseAdmin()
+
+  const { data: extractions, error } = await db
+    .from('extractions')
+    .select('*')
+    .in('account_id', accountIds)
+    .eq('status', 'pending')
+    .order('confidence', { ascending: true })
+    .returns<Extraction[]>()
+  if (error) throw new Error(error.message)
+  if (!extractions?.length) return []
+
+  const docIds = [...new Set(extractions.map((e) => e.document_id))]
+  const { data: docs } = await db.from('documents').select('id, filename').in('id', docIds)
+  const fileMap = new Map((docs ?? []).map((d) => [d.id, d.filename]))
+
+  return extractions.map((ext) => ({
+    ...ext,
+    account_name: nameMap.get(ext.account_id) ?? 'Unknown',
+    document_filename: fileMap.get(ext.document_id) ?? 'Document',
+  }))
+}
+
+export interface ExportReadyAccount extends AccountListItem {
+  hasAnalysis: boolean
+  analysisDate: string | null
+}
+
+export async function listExportReadyAccounts(workspaceId: string): Promise<ExportReadyAccount[]> {
+  const accounts = await listAccounts(workspaceId)
+  if (accounts.length === 0) return []
+
+  const accountIds = accounts.map((a) => a.id)
+  const db = supabaseAdmin()
+  const { data: analyses } = await db
+    .from('account_analyses')
+    .select('account_id, created_at')
+    .in('account_id', accountIds)
+    .order('created_at', { ascending: false })
+
+  const analysisMap = new Map<string, string>()
+  for (const row of analyses ?? []) {
+    if (!analysisMap.has(row.account_id)) {
+      analysisMap.set(row.account_id, row.created_at)
+    }
+  }
+
+  return accounts.map((account) => ({
+    ...account,
+    hasAnalysis: analysisMap.has(account.id),
+    analysisDate: analysisMap.get(account.id) ?? null,
+  }))
+}
+
+export interface WorkspaceAnalytics extends DashboardInsights {
+  stats: WorkspaceStats
+  accounts: AccountListItem[]
+  analysisCount: number
+  approvedCount: number
+  editedCount: number
+  rejectedCount: number
+}
+
+export async function getWorkspaceAnalytics(workspaceId: string): Promise<WorkspaceAnalytics> {
+  const [accounts, insights] = await Promise.all([
+    listAccounts(workspaceId),
+    getWorkspaceDashboardInsights(workspaceId),
+  ])
+  const stats = summarizeWorkspace(accounts)
+  const accountIds = accounts.map((a) => a.id)
+
+  let analysisCount = 0
+  let approvedCount = 0
+  let editedCount = 0
+  let rejectedCount = 0
+
+  if (accountIds.length > 0) {
+    const db = supabaseAdmin()
+    const [{ count: analysisTotal }, { data: extractionStats }] = await Promise.all([
+      db
+        .from('account_analyses')
+        .select('id', { count: 'exact', head: true })
+        .in('account_id', accountIds),
+      db.from('extractions').select('status').in('account_id', accountIds),
+    ])
+    analysisCount = analysisTotal ?? 0
+    for (const row of extractionStats ?? []) {
+      if (row.status === 'approved') approvedCount += 1
+      else if (row.status === 'edited') editedCount += 1
+      else if (row.status === 'rejected') rejectedCount += 1
+    }
+  }
+
+  return {
+    ...insights,
+    stats,
+    accounts,
+    analysisCount,
+    approvedCount,
+    editedCount,
+    rejectedCount,
+  }
+}
+
