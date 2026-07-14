@@ -17,7 +17,7 @@ export function supabaseAdmin(): SupabaseClient {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!url || !serviceKey) {
     throw new Error(
-      'Missing Supabase env vars. Copy platform/.env.example to platform/.env.local.',
+      'Missing Supabase env vars. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on Vercel.',
     )
   }
   cached = createClient(url, serviceKey, {

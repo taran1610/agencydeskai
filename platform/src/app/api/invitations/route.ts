@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { APP_URL } from '@/config/urls'
 import { isAuthContext, requireAuth, requireOwner } from '@/lib/auth/session'
 import { logAudit } from '@/lib/audit'
 import { listPendingInvitations } from '@/lib/data'
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
     detail: { email, role },
   })
 
-  const origin = request.headers.get('origin') ?? 'http://localhost:3000'
+  const origin = request.headers.get('origin') ?? APP_URL
   const inviteUrl = `${origin}/invite/${invitation.token}`
 
   return NextResponse.json({ invitation, inviteUrl }, { status: 201 })

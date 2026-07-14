@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { FileSearch } from 'lucide-react'
 import { LoginForm } from '@/components/LoginForm'
+import { MARKETING_URL } from '@/config/urls'
 import { isSupabasePublicConfigured } from '@/lib/supabase/config'
 
 export default function LoginPage() {
@@ -19,15 +20,15 @@ export default function LoginPage() {
 
       {!configured ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
-          <p className="font-medium">Supabase not configured</p>
+          <p className="font-medium">Supabase not configured on Vercel</p>
           <p className="mt-2 text-amber-900/80">
-            Add <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_URL</code> and{' '}
-            <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to{' '}
-            <code className="rounded bg-amber-100 px-1">platform/.env.local</code>, then restart
-            the dev server.
+            Add <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_URL</code>,{' '}
+            <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, and{' '}
+            <code className="rounded bg-amber-100 px-1">SUPABASE_SERVICE_ROLE_KEY</code> in the{' '}
+            <strong>agencydeskai-app</strong> Vercel project, then redeploy.
           </p>
           <Link href="/" className="mt-4 inline-block text-sm font-medium underline">
-            Back to setup guide
+            View setup checklist
           </Link>
         </div>
       ) : (
@@ -37,7 +38,7 @@ export default function LoginPage() {
       )}
 
       <p className="mt-8 text-center text-xs text-slate-400">
-        <Link href="http://localhost:5173" className="underline hover:text-slate-600">
+        <Link href={MARKETING_URL} className="underline hover:text-slate-600">
           Marketing site
         </Link>
         {' · '}

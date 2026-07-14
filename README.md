@@ -4,28 +4,27 @@
 
 The repo root (`src/`) contains the **marketing site** and waitlist for the private beta.
 
-## Quick start (product)
+## Production URLs
 
-```bash
-cd platform
-npm install
-cp .env.example .env.local   # Supabase + AI keys
-npm run dev
-```
+| App | URL |
+|-----|-----|
+| Marketing site | https://agencydeskai.vercel.app |
+| Operations console | https://agencydeskai-app.vercel.app |
 
-Open [http://localhost:3000](http://localhost:3000). First signup creates your workspace as **owner**. Invite reviewers and viewers from **Settings → Team**.
+## Production setup
 
-Apply migrations in `supabase/migrations/` to your Supabase project before first run.
+1. Apply all migrations in `supabase/migrations/` in the Supabase SQL editor.
+2. Configure Supabase **Authentication → URL Configuration**:
+   - Site URL: `https://agencydeskai-app.vercel.app`
+   - Redirect URL: `https://agencydeskai-app.vercel.app/api/auth/callback`
+3. Set Vercel env vars on **agencydeskai-app**:
+   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+   - `ANTHROPIC_API_KEY` and/or `OPENAI_API_KEY`
+4. Set Vercel env vars on **agencydeskai** (marketing):
+   - `VITE_APP_URL=https://agencydeskai-app.vercel.app`
+   - `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (waitlist)
 
-## Quick start (marketing site)
-
-```bash
-npm install
-cp .env.example .env.local
-npm run dev
-```
-
-Open [http://localhost:5173](http://localhost:5173).
+Sign in at https://agencydeskai-app.vercel.app/login — first signup creates your workspace as **owner**.
 
 ## Repository layout
 

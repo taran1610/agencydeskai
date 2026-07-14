@@ -10,10 +10,7 @@ const siteUrl = trimTrailingSlash(
 const xHandleRaw = (import.meta.env.VITE_X_HANDLE || '').replace(/^@/, '')
 
 const appUrl = trimTrailingSlash(
-  import.meta.env.VITE_APP_URL ||
-    (import.meta.env.PROD
-      ? 'https://agencydeskai-app.vercel.app'
-      : 'http://localhost:3000'),
+  import.meta.env.VITE_APP_URL || 'https://agencydeskai-app.vercel.app',
 )
 
 export const site = {
