@@ -59,8 +59,8 @@ export async function createCheckoutSession(options: {
     mode: 'subscription',
     customer: customerId,
     line_items: [{ price: getStripePriceId(), quantity: 1 }],
-    success_url: `${APP_URL}/settings?billing=success`,
-    cancel_url: `${APP_URL}/settings?billing=canceled`,
+    success_url: `${APP_URL}/billing?billing=success`,
+    cancel_url: `${APP_URL}/billing?billing=canceled`,
     client_reference_id: workspace.id,
     metadata: {
       workspace_id: workspace.id,
@@ -94,7 +94,7 @@ export async function createBillingPortalSession(workspaceId: string) {
   const stripe = getStripe()
   const session = await stripe.billingPortal.sessions.create({
     customer: workspace.stripe_customer_id,
-    return_url: `${APP_URL}/settings`,
+    return_url: `${APP_URL}/billing`,
   })
 
   return session.url

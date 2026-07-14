@@ -1,10 +1,16 @@
 /**
- * One-time setup: creates AgencyDesk Pro product + monthly price in Stripe.
- * Run from platform/: npx tsx scripts/stripe-setup.ts
+ * One-time Stripe setup for AgencyDesk AI.
+ * Creates product, price, and webhook endpoint.
+ *
+ * Run: STRIPE_SECRET_KEY=sk_test_... npx tsx scripts/stripe-setup.ts
  */
 import Stripe from 'stripe'
 
 const key = process.env.STRIPE_SECRET_KEY
+const webhookUrl =
+  process.env.STRIPE_WEBHOOK_URL ??
+  'https://agencydeskai-app.vercel.app/api/webhooks/stripe'
+
 if (!key) {
   console.error('Set STRIPE_SECRET_KEY in the environment first.')
   process.exit(1)
@@ -12,7 +18,14 @@ if (!key) {
 
 const stripe = new Stripe(key)
 
-async function main() {
+const WEBHOOK_EVENTS: Stripe.WebhookEndpointCreateParams.EnabledEvent[] = [
+  'checkout.session.completed',
+  'customer.subscription.created',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
+]
+
+async function ensureProductAndPrice() {
   const existing = await stripe.products.search({
     query: "name:'AgencyDesk Pro'",
   })
@@ -47,8 +60,41 @@ async function main() {
     console.log('Price already exists:', price.id)
   }
 
-  console.log('\nAdd to Vercel (agencydeskai-app):')
-  console.log(`STRIPE_PRICE_ID=${price.id}`)
+  return price.id
+}
+
+async function ensureWebhook() {
+  const endpoints = await stripe.webhookEndpoints.list({ limit: 100 })
+  const match = endpoints.data.find((e) => e.url === webhookUrl && e.status !== 'disabled')
+
+  if (match) {
+    console.log('Webhook already exists:', match.id)
+    console.log('If you lost the secret, delete this endpoint in Stripe Dashboard and re-run this script.')
+    return null
+  }
+
+  const endpoint = await stripe.webhookEndpoints.create({
+    url: webhookUrl,
+    enabled_events: WEBHOOK_EVENTS,
+    description: 'AgencyDesk AI — subscription sync',
+  })
+
+  console.log('Created webhook:', endpoint.id)
+  return endpoint.secret
+}
+
+async function main() {
+  const priceId = await ensureProductAndPrice()
+  const webhookSecret = await ensureWebhook()
+
+  console.log('\n--- Add to Vercel (agencydeskai-app) ---')
+  console.log(`STRIPE_PRICE_ID=${priceId}`)
+  if (webhookSecret) {
+    console.log(`STRIPE_WEBHOOK_SECRET=${webhookSecret}`)
+  }
+  console.log('\nAlso enable in Stripe Dashboard:')
+  console.log('- Settings → Billing → Customer portal')
+  console.log('- Settings → Tax → Stripe Tax')
 }
 
 main().catch((err) => {

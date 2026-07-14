@@ -10,9 +10,13 @@ import {
 } from '@/components/dashboard/GettingStartedCard'
 import { RecentActivity } from '@/components/dashboard/RecentActivity'
 import { DemoDataBanner } from '@/components/DemoDataBanner'
+import { SubscribeBanner } from '@/components/SubscribeBanner'
 import { OverviewQuickNav } from '@/components/sections/OverviewQuickNav'
 import { hasAiConfigured, requireConsolePage } from '@/lib/console-page'
 import { getWorkspaceDashboardInsights, listAccounts, summarizeWorkspace } from '@/lib/data'
+import { getWorkspaceBilling } from '@/lib/stripe/billing'
+import { isStripeConfigured } from '@/lib/stripe/client'
+import { isSubscriptionActive } from '@/lib/stripe/status'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,12 +27,14 @@ export default async function OverviewPage() {
   }
   const { auth, canCreate } = result
 
-  const [accounts, insights] = await Promise.all([
+  const [accounts, insights, billing] = await Promise.all([
     listAccounts(auth.workspaceId),
     getWorkspaceDashboardInsights(auth.workspaceId),
+    getWorkspaceBilling(auth.workspaceId),
   ])
   const stats = summarizeWorkspace(accounts)
   const hasDemo = accounts.some((a) => a.is_demo)
+  const subscriptionActive = isSubscriptionActive(billing?.subscription_status ?? 'none')
   const featured = accounts.slice(0, 3)
 
   return (
@@ -41,6 +47,12 @@ export default async function OverviewPage() {
       />
 
       <DemoDataBanner hasDemo={hasDemo} canManage={auth.role === 'owner'} />
+
+      <SubscribeBanner
+        isOwner={auth.role === 'owner'}
+        stripeConfigured={isStripeConfigured()}
+        subscriptionActive={subscriptionActive}
+      />
 
       <DashboardStats stats={stats} />
 

@@ -130,6 +130,15 @@ const trustBullets = [
   },
 ] as const
 
+const pricingIncludes = [
+  'AI document intake, classification, and extraction',
+  'Human review workflow with confidence scores',
+  'Account analysis, flags, and CRM-ready export',
+  'Workspace roles — owner, reviewer, viewer',
+  'Team invites and audit trail',
+  'CSV and HTML report exports',
+] as const
+
 export const LandingPage = () => {
   const navScrolled = useScrolledPast(24)
 
@@ -149,6 +158,7 @@ export const LandingPage = () => {
             <a href="#features">What we do</a>
             <a href="#how-it-works">How it works</a>
             <a href="#for-brokers">Who it&rsquo;s for</a>
+            <a href="#pricing">Pricing</a>
             <a href="#trust">Trust</a>
           </nav>
           <div className="nav__actions">
@@ -335,6 +345,46 @@ export const LandingPage = () => {
                 </li>
               ))}
             </ul>
+          </div>
+        </section>
+
+        {/* PRICING */}
+        <section id="pricing" className="pricing">
+          <div className="container">
+            <div className="section-head">
+              <p className="label">Pricing</p>
+              <h2 className="section-head__title">
+                One plan. Full ops console. Billed per <em>workspace.</em>
+              </h2>
+              <p className="section-head__sub">
+                Cancel anytime. Private beta seats can join the waitlist first —
+                Pro unlocks the full console when you&rsquo;re ready.
+              </p>
+            </div>
+            <div className="pricing__panel">
+              <div className="pricing__offer">
+                <p className="pricing__plan-label">AgencyDesk Pro</p>
+                <div className="pricing__amount">
+                  <span className="pricing__currency">$</span>
+                  <span className="pricing__price">299</span>
+                  <span className="pricing__period">/ month</span>
+                </div>
+                <p className="pricing__note">Per agency workspace · unlimited team members</p>
+                <div className="pricing__actions">
+                  <a href={site.loginUrl} className="btn btn--primary">
+                    Launch console
+                  </a>
+                  <a href="#beta" className="btn btn--outline">
+                    Join waitlist
+                  </a>
+                </div>
+              </div>
+              <ul className="pricing__includes">
+                {pricingIncludes.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
           </div>
         </section>
 

@@ -6,6 +6,7 @@ import {
   BarChart3,
   Bot,
   ChevronDown,
+  CreditCard,
   Database,
   FileText,
   LayoutDashboard,
@@ -27,6 +28,7 @@ const NAV = [
   { href: '/exports', label: 'CRM & exports', icon: Database },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/integrations', label: 'Integrations', icon: Plug },
+  { href: '/billing', label: 'Billing', icon: CreditCard },
   { href: '/settings', label: 'Settings', icon: Settings },
 ] as const
 

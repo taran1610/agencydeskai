@@ -15,6 +15,7 @@ export const SiteFooter = () => (
         <span className="footer__col-label">Product</span>
         <a href="/#features">What we do</a>
         <a href="/#how-it-works">How it works</a>
+        <a href="/#pricing">Pricing</a>
         <a href="/#trust">Trust</a>
       </nav>
       <nav className="footer__col" aria-label="Company">
