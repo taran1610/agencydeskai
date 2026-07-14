@@ -1,32 +1,25 @@
 import Link from 'next/link'
-import {
-  ArrowRight,
-  CheckCircle2,
-  Circle,
-  FileUp,
-  Sparkles,
-  UserPlus,
-} from 'lucide-react'
+import { ArrowRight, CheckCircle2, Circle } from 'lucide-react'
 import type { AccountListItem } from '@/lib/data'
 
 const STEPS = [
   {
-    icon: UserPlus,
+    num: '01',
     title: 'Create a client account',
     body: 'One account per insured — Maple Ridge Logistics, Smith Family, etc.',
   },
   {
-    icon: FileUp,
+    num: '02',
     title: 'Upload the document packet',
     body: 'ACORDs, loss runs, dec pages, COIs, endorsements. PDF or scanned images.',
   },
   {
-    icon: Sparkles,
+    num: '03',
     title: 'Process with AI',
     body: 'Each document is classified and every material field extracted with confidence scores.',
   },
   {
-    icon: CheckCircle2,
+    num: '04',
     title: 'Review, analyze, export',
     body: 'Approve fields, generate the account summary, copy CRM updates, export CSV.',
   },
@@ -59,83 +52,77 @@ export function GettingStarted({
   if (completed === checklist.length && hasAccount) return null
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-100 px-6 py-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+    <section className="border border-[var(--border)] bg-white">
+      <div className="border-b border-[var(--border)] px-6 py-5 sm:px-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">Getting started</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Follow these steps to process your first client file end-to-end.
+            <p className="console-label">Onboarding</p>
+            <h2 className="console-title mt-2 text-2xl">Getting started</h2>
+            <p className="mt-2 text-sm text-[var(--ink-muted)]">
+              Process your first client file end-to-end.
             </p>
           </div>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+          <span className="console-label border border-[var(--border)] px-3 py-1.5">
             {completed} of {checklist.length} complete
           </span>
         </div>
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">
+        <div className="mt-5 h-px w-full bg-[var(--border)]">
           <div
-            className="h-full rounded-full bg-slate-900 transition-all"
+            className="h-px bg-[var(--ink)] transition-all"
             style={{ width: `${(completed / checklist.length) * 100}%` }}
           />
         </div>
       </div>
 
-      <div className="grid gap-6 p-6 lg:grid-cols-2">
-        <ul className="space-y-2.5">
+      <div className="grid lg:grid-cols-2 lg:divide-x lg:divide-[var(--border)]">
+        <ul className="space-y-3 border-b border-[var(--border)] p-6 sm:p-8 lg:border-b-0">
           {checklist.map((item) => (
-            <li key={item.label} className="flex items-center gap-2.5 text-sm">
+            <li key={item.label} className="flex items-start gap-3 text-sm">
               {item.done ? (
-                <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
+                <CheckCircle2 size={17} className="mt-0.5 shrink-0 text-[var(--ink)]" />
               ) : (
-                <Circle size={18} className="shrink-0 text-slate-300" />
+                <Circle size={17} className="mt-0.5 shrink-0 text-[var(--ink-faint)]" />
               )}
-              <span className={item.done ? 'text-slate-500 line-through' : 'text-slate-700'}>
+              <span className={item.done ? 'text-[var(--ink-faint)] line-through' : 'text-[var(--ink-soft)]'}>
                 {item.label}
               </span>
             </li>
           ))}
         </ul>
 
-        <ol className="space-y-4">
-          {STEPS.map((step, i) => {
-            const Icon = step.icon
-            return (
-              <li key={step.title} className="flex gap-3">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                  <Icon size={16} />
-                </span>
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                    Step {i + 1}
-                  </p>
-                  <p className="text-sm font-medium text-slate-800">{step.title}</p>
-                  <p className="text-xs text-slate-500">{step.body}</p>
-                </div>
-              </li>
-            )
-          })}
+        <ol className="divide-y divide-[var(--border)]">
+          {STEPS.map((step) => (
+            <li key={step.num} className="relative px-6 py-5 sm:px-8">
+              <span className="absolute right-6 top-4 font-serif text-3xl text-[var(--cream-muted)] sm:right-8">
+                {step.num}
+              </span>
+              <p className="console-label">Step {step.num}</p>
+              <p className="console-card-title mt-2 text-base">{step.title}</p>
+              <p className="mt-1 max-w-sm text-xs leading-relaxed text-[var(--ink-muted)]">
+                {step.body}
+              </p>
+            </li>
+          ))}
         </ol>
       </div>
 
-      {canCreate && !hasAccount && (
-        <div className="border-t border-slate-100 px-6 py-4">
-          <p className="text-sm text-slate-600">
-            Use the <strong>New account</strong> form above to create your first client, then
-            upload their document packet.
-          </p>
+      {(canCreate && !hasAccount) || (hasAccount && accounts[0]) ? (
+        <div className="border-t border-[var(--border)] bg-[var(--cream-panel)] px-6 py-4 sm:px-8">
+          {canCreate && !hasAccount && (
+            <p className="text-sm text-[var(--ink-muted)]">
+              Use the form above to create your first client, then upload their document packet.
+            </p>
+          )}
+          {hasAccount && accounts[0] && (
+            <Link
+              href={`/accounts/${accounts[0].id}`}
+              className="console-label inline-flex items-center gap-1.5 text-[var(--ink)] hover:opacity-70"
+            >
+              Open {accounts[0].name} <ArrowRight size={12} />
+            </Link>
+          )}
         </div>
-      )}
-
-      {hasAccount && accounts[0] && (
-        <div className="border-t border-slate-100 px-6 py-4">
-          <Link
-            href={`/accounts/${accounts[0].id}`}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-900 hover:text-slate-600"
-          >
-            Open {accounts[0].name} <ArrowRight size={14} />
-          </Link>
-        </div>
-      )}
-    </div>
+      ) : null}
+    </section>
   )
 }

@@ -42,6 +42,11 @@ export default async function AccountPage({
           </Link>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
             {account.name}
+            {account.is_demo && (
+              <span className="ml-2 align-middle text-xs font-normal uppercase tracking-wide text-slate-400">
+                Sample
+              </span>
+            )}
           </h1>
           <p className="mt-1 text-sm text-slate-500">
             {documents.length} {documents.length === 1 ? 'document' : 'documents'} ·{' '}

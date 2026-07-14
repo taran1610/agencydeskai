@@ -19,6 +19,7 @@ export interface Account {
   name: string
   status: 'active' | 'archived'
   workspace_id: string
+  is_demo?: boolean
   created_at: string
   updated_at: string
 }

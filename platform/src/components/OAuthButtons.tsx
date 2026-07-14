@@ -77,7 +77,7 @@ export function OAuthButtons() {
           type="button"
           onClick={() => signIn(p.id)}
           disabled={busy !== null}
-          className="flex w-full items-center justify-center gap-2.5 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2.5 border border-[var(--border-strong)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--ink)] transition hover:bg-[var(--cream-panel)] disabled:opacity-50"
         >
           {p.icon}
           {busy === p.id ? 'Redirecting…' : p.label}
@@ -88,7 +88,7 @@ export function OAuthButtons() {
           {error}
         </p>
       )}
-      <p className="text-center text-[11px] text-slate-400">
+      <p className="text-center text-[11px] text-[var(--ink-faint)]">
         Google &amp; Apple require enabling providers in your Supabase project
         (Authentication → Providers).
       </p>

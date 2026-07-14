@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
 
 export function NewAccountForm() {
   const router = useRouter()
@@ -33,26 +32,24 @@ export function NewAccountForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col items-end gap-1">
-      <div className="flex gap-2">
+    <form onSubmit={onSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-end">
+      <div className="min-w-0 flex-1">
+        <label className="mb-1.5 block text-xs font-medium text-[var(--gray-500)]">
+          New client name
+        </label>
         <input
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder="New client name, e.g. Maple Ridge Logistics"
-          className="w-72 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none"
+          placeholder="Maple Ridge Logistics"
+          className="console-input"
           required
           minLength={2}
         />
-        <button
-          type="submit"
-          disabled={busy}
-          className="flex items-center gap-1.5 rounded-md bg-slate-900 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
-        >
-          <Plus size={15} />
-          {busy ? 'Creating…' : 'New account'}
-        </button>
       </div>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      <button type="submit" disabled={busy} className="console-btn-primary shrink-0 sm:mb-0">
+        {busy ? 'Creating…' : '+ New account'}
+      </button>
+      {error && <p className="w-full text-xs text-black sm:col-span-2">{error}</p>}
     </form>
   )
 }

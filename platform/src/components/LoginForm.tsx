@@ -77,20 +77,22 @@ export function LoginForm({
         <>
           <OAuthButtons />
           <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs text-slate-400">or use email</span>
-            <div className="h-px flex-1 bg-slate-200" />
+            <div className="h-px flex-1 bg-[var(--border)]" />
+            <span className="console-label">or use email</span>
+            <div className="h-px flex-1 bg-[var(--border)]" />
           </div>
         </>
       )}
 
       {!lockEmail && (
-        <div className="mb-6 flex rounded-lg border border-slate-200 bg-slate-50 p-1">
+        <div className="mb-6 grid grid-cols-2 border border-[var(--border)]">
           <button
             type="button"
             onClick={() => setMode('signin')}
-            className={`flex-1 rounded-md py-2 text-sm font-medium transition ${
-              mode === 'signin' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
+            className={`py-2.5 text-xs font-semibold uppercase tracking-wide transition ${
+              mode === 'signin'
+                ? 'bg-[var(--ink)] text-white'
+                : 'bg-white text-[var(--ink-muted)] hover:text-[var(--ink)]'
             }`}
           >
             Sign in
@@ -98,8 +100,10 @@ export function LoginForm({
           <button
             type="button"
             onClick={() => setMode('signup')}
-            className={`flex-1 rounded-md py-2 text-sm font-medium transition ${
-              mode === 'signup' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
+            className={`border-l border-[var(--border)] py-2.5 text-xs font-semibold uppercase tracking-wide transition ${
+              mode === 'signup'
+                ? 'bg-[var(--ink)] text-white'
+                : 'bg-white text-[var(--ink-muted)] hover:text-[var(--ink)]'
             }`}
           >
             Create account
@@ -111,65 +115,59 @@ export function LoginForm({
         {mode === 'signup' && !lockEmail && (
           <>
             <div>
-              <label className="text-xs font-medium text-slate-600">Your name</label>
+              <label className="console-label">Your name</label>
               <input
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                className="console-input mt-1.5"
                 placeholder="Jane Smith"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600">Agency name</label>
+              <label className="console-label">Agency name</label>
               <input
                 value={workspaceName}
                 onChange={(e) => setWorkspaceName(e.target.value)}
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                className="console-input mt-1.5"
                 placeholder="Smith Insurance Agency"
               />
-              <p className="mt-1 text-[11px] text-slate-400">
+              <p className="mt-1.5 text-[11px] text-[var(--ink-faint)]">
                 First signup creates your workspace. Later users need an invitation.
               </p>
             </div>
           </>
         )}
         <div>
-          <label className="text-xs font-medium text-slate-600">Email</label>
+          <label className="console-label">Email</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             readOnly={lockEmail}
             required
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm read-only:bg-slate-50"
+            className="console-input mt-1.5 read-only:bg-[var(--cream-panel)]"
           />
         </div>
         <div>
-          <label className="text-xs font-medium text-slate-600">Password</label>
+          <label className="console-label">Password</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="console-input mt-1.5"
           />
         </div>
         {error && (
-          <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {error}
-          </p>
+          <p className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
         )}
         {notice && (
-          <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+          <p className="border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
             {notice}
           </p>
         )}
-        <button
-          type="submit"
-          disabled={busy}
-          className="w-full rounded-md bg-slate-900 py-2.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
-        >
+        <button type="submit" disabled={busy} className="console-btn-primary w-full">
           {busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in with email'}
         </button>
       </form>

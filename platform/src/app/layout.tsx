@@ -1,64 +1,58 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
-import { FileSearch } from "lucide-react";
-import { UserMenu } from "@/components/UserMenu";
-import { getAuthContext } from "@/lib/auth/session";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import Link from 'next/link'
+import { ConsoleShell } from '@/components/console/ConsoleShell'
+import { getAuthContext } from '@/lib/auth/session'
+import { getProfileDisplayName } from '@/lib/data'
+import './globals.css'
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans-app',
+})
 
 export const metadata: Metadata = {
-  title: "AgencyDesk AI — Operations Console",
+  title: 'AgencyDesk AI — Operations Console',
   description:
-    "AI operations teammate for insurance agencies: document intake, extraction, flags, and CRM prep with human approval.",
-};
+    'AI operations teammate for insurance agencies: document intake, extraction, flags, and CRM prep with human approval.',
+}
+
+function hasAiConfigured() {
+  return Boolean(process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY)
+}
 
 export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
-  const auth = await getAuthContext();
+  const auth = await getAuthContext()
+  const displayName = auth ? await getProfileDisplayName(auth.userId) : null
+  const hasAiKey = hasAiConfigured()
 
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        <header className="border-b border-slate-200 bg-white">
-          <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-6">
-            <Link href="/" className="flex items-center gap-2.5">
-              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-900 text-white">
-                <FileSearch size={15} strokeWidth={2} />
-              </span>
-              <span className="text-[15px] font-semibold tracking-tight text-slate-900">
-                AgencyDesk AI
-              </span>
-              <span className="ml-1 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[11px] font-medium text-slate-500">
-                Operations Console
-              </span>
-            </Link>
-            {auth ? (
-              <UserMenu email={auth.email} role={auth.role} />
-            ) : (
-              <span className="text-xs text-slate-400">
-                Human approval required before anything leaves this console
-              </span>
-            )}
+    <html lang="en" className={`${inter.variable} h-full antialiased`}>
+      <body className="h-full">
+        {auth ? (
+          <ConsoleShell auth={auth} displayName={displayName} hasAiKey={hasAiKey}>
+            {children}
+          </ConsoleShell>
+        ) : (
+          <div className="flex min-h-full flex-col">
+            <header className="border-b border-[var(--border)] bg-white">
+              <div className="mx-auto flex h-14 w-full max-w-lg items-center justify-between px-6">
+                <Link href="/login" className="text-sm font-semibold text-black">
+                  AgencyDesk AI
+                </Link>
+                <span className="text-[10px] font-medium uppercase tracking-wider text-[var(--gray-400)]">
+                  Operations console
+                </span>
+              </div>
+            </header>
+            <main className="mx-auto w-full max-w-lg flex-1 px-6 py-10">{children}</main>
           </div>
-        </header>
-        <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">{children}</main>
+        )}
       </body>
     </html>
-  );
+  )
 }

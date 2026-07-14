@@ -8,6 +8,7 @@ import type {
   Invitation,
   WorkspaceMember,
 } from '@/lib/types'
+import { DOC_TYPE_LABELS } from '@/lib/types'
 
 export interface AccountListItem extends Account {
   documentCount: number
@@ -155,6 +156,125 @@ export async function listTeamMembers(workspaceId: string): Promise<WorkspaceMem
     ...member,
     profile: profileMap.get(member.user_id),
   })) as WorkspaceMember[]
+}
+
+export interface DashboardActivity {
+  id: string
+  title: string
+  detail: string
+  created_at: string
+  actor: AuditEntry['actor']
+}
+
+export interface DashboardInsights {
+  recentActivity: DashboardActivity[]
+  documentTypes: Array<{ type: string; label: string; count: number }>
+  confidence: { high: number; medium: number; low: number; average: number; total: number }
+}
+
+const AUDIT_LABELS: Record<string, string> = {
+  'account.created': 'Account created',
+  'document.processed': 'Document processed',
+  'document.uploaded': 'Document uploaded',
+  'account.analyzed': 'Account analyzed',
+  'demo.account_created': 'Sample account created',
+  'demo.workspace_seeded': 'Sample data loaded',
+  'extraction.approved': 'Field approved',
+  'extraction.edited': 'Field edited',
+  'extraction.rejected': 'Field rejected',
+}
+
+export async function getWorkspaceDashboardInsights(
+  workspaceId: string,
+): Promise<DashboardInsights> {
+  const db = supabaseAdmin()
+  const { data: accounts } = await db
+    .from('accounts')
+    .select('id, name')
+    .eq('workspace_id', workspaceId)
+  const accountIds = (accounts ?? []).map((a) => a.id)
+  const accountNames = new Map((accounts ?? []).map((a) => [a.id, a.name]))
+
+  if (accountIds.length === 0) {
+    return {
+      recentActivity: [],
+      documentTypes: [],
+      confidence: { high: 0, medium: 0, low: 0, average: 0, total: 0 },
+    }
+  }
+
+  const [{ data: documents }, { data: extractions }, { data: audit }] = await Promise.all([
+    db.from('documents').select('doc_type').in('account_id', accountIds),
+    db.from('extractions').select('confidence').in('account_id', accountIds),
+    db
+      .from('audit_log')
+      .select('*')
+      .in('account_id', accountIds)
+      .order('created_at', { ascending: false })
+      .limit(8),
+  ])
+
+  const typeCounts = new Map<string, number>()
+  for (const doc of documents ?? []) {
+    const key = doc.doc_type ?? 'other'
+    typeCounts.set(key, (typeCounts.get(key) ?? 0) + 1)
+  }
+
+  const documentTypes = [...typeCounts.entries()]
+    .map(([type, count]) => ({
+      type,
+      label: DOC_TYPE_LABELS[type as keyof typeof DOC_TYPE_LABELS] ?? type,
+      count,
+    }))
+    .sort((a, b) => b.count - a.count)
+
+  let high = 0
+  let medium = 0
+  let low = 0
+  let sum = 0
+  for (const row of extractions ?? []) {
+    sum += row.confidence
+    if (row.confidence >= 0.9) high += 1
+    else if (row.confidence >= 0.7) medium += 1
+    else low += 1
+  }
+  const total = extractions?.length ?? 0
+
+  const recentActivity: DashboardActivity[] = (audit ?? []).map((entry) => {
+    const accountName = entry.account_id ? accountNames.get(entry.account_id) : null
+    const label = AUDIT_LABELS[entry.action] ?? entry.action.replace(/\./g, ' ')
+    const detail =
+      typeof entry.detail?.name === 'string'
+        ? entry.detail.name
+        : typeof entry.detail?.filename === 'string'
+          ? entry.detail.filename
+          : (accountName ?? '')
+    return {
+      id: entry.id,
+      title: accountName ? `${accountName} — ${label}` : label,
+      detail,
+      created_at: entry.created_at,
+      actor: entry.actor,
+    }
+  })
+
+  return {
+    recentActivity,
+    documentTypes,
+    confidence: {
+      high,
+      medium,
+      low,
+      total,
+      average: total > 0 ? sum / total : 0,
+    },
+  }
+}
+
+export async function getProfileDisplayName(userId: string): Promise<string | null> {
+  const db = supabaseAdmin()
+  const { data } = await db.from('profiles').select('full_name').eq('id', userId).single()
+  return data?.full_name ?? null
 }
 
 export async function listPendingInvitations(workspaceId: string): Promise<Invitation[]> {
