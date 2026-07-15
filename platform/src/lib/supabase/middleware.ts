@@ -40,9 +40,11 @@ export async function updateSession(request: NextRequest) {
   if (!user && !isPublic) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'
-    loginUrl.searchParams.set('next', pathname)
+    const next = `${pathname}${request.nextUrl.search}`
+    loginUrl.searchParams.set('next', next)
     return NextResponse.redirect(loginUrl)
   }
 
+  response.headers.set('x-pathname', pathname)
   return response
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import Link from 'next/link'
+import { Cormorant_Garamond, Inter } from 'next/font/google'
+import { headers } from 'next/headers'
 import { ConsoleShell } from '@/components/console/ConsoleShell'
 import { getAuthContext } from '@/lib/auth/session'
 import { getProfileDisplayName } from '@/lib/data'
@@ -9,6 +9,12 @@ import './globals.css'
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-sans-app',
+})
+
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-serif-login',
 })
 
 export const metadata: Metadata = {
@@ -29,28 +35,18 @@ export default async function RootLayout({
   const auth = await getAuthContext()
   const displayName = auth ? await getProfileDisplayName(auth.userId) : null
   const hasAiKey = hasAiConfigured()
+  const pathname = (await headers()).get('x-pathname') ?? ''
+  const standaloneRoute = pathname === '/checkout' || pathname.startsWith('/checkout/')
 
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${cormorant.variable} h-full antialiased`}>
       <body className="h-full">
-        {auth ? (
+        {auth && !standaloneRoute ? (
           <ConsoleShell auth={auth} displayName={displayName} hasAiKey={hasAiKey}>
             {children}
           </ConsoleShell>
         ) : (
-          <div className="flex min-h-full flex-col">
-            <header className="border-b border-[var(--border)] bg-white">
-              <div className="mx-auto flex h-14 w-full max-w-lg items-center justify-between px-6">
-                <Link href="/login" className="text-sm font-semibold text-black">
-                  AgencyDesk AI
-                </Link>
-                <span className="text-[10px] font-medium uppercase tracking-wider text-[var(--gray-400)]">
-                  Operations console
-                </span>
-              </div>
-            </header>
-            <main className="mx-auto w-full max-w-lg flex-1 px-6 py-10">{children}</main>
-          </div>
+          children
         )}
       </body>
     </html>

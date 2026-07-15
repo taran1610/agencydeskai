@@ -24,9 +24,19 @@ export async function getOrCreateStripeCustomer(
   workspace: WorkspaceBilling,
   email: string,
 ): Promise<string> {
-  if (workspace.stripe_customer_id) return workspace.stripe_customer_id
-
   const stripe = getStripe()
+
+  if (workspace.stripe_customer_id) {
+    try {
+      const existing = await stripe.customers.retrieve(workspace.stripe_customer_id)
+      if (!('deleted' in existing && existing.deleted)) {
+        return existing.id
+      }
+    } catch {
+      // Stale ID (e.g. keys rotated to another Stripe account) — create fresh below.
+    }
+  }
+
   const customer = await stripe.customers.create({
     email,
     name: workspace.name,
@@ -60,7 +70,7 @@ export async function createCheckoutSession(options: {
     customer: customerId,
     line_items: [{ price: getStripePriceId(), quantity: 1 }],
     success_url: `${APP_URL}/billing?billing=success`,
-    cancel_url: `${APP_URL}/billing?billing=canceled`,
+    cancel_url: `${APP_URL}/checkout?plan=solo&billing=canceled`,
     client_reference_id: workspace.id,
     metadata: {
       workspace_id: workspace.id,

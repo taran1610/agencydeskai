@@ -40,19 +40,28 @@ const PROVIDERS: { id: Provider; label: string; icon: ReactNode }[] = [
   },
 ]
 
-export function OAuthButtons() {
+export function OAuthButtons({
+  nextPath = '/',
+  variant = 'default',
+}: {
+  nextPath?: string
+  variant?: 'default' | 'split'
+}) {
   const [busy, setBusy] = useState<Provider | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const isSplit = variant === 'split'
 
   async function signIn(provider: Provider) {
     setBusy(provider)
     setError(null)
     try {
       const supabase = createClient()
+      const callbackUrl = new URL(`${window.location.origin}/api/auth/callback`)
+      callbackUrl.searchParams.set('next', nextPath)
       const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
+          redirectTo: callbackUrl.toString(),
         },
       })
       if (oauthError) throw oauthError
@@ -70,28 +79,40 @@ export function OAuthButtons() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className={isSplit ? 'login-form-split__oauth' : 'space-y-3'}>
       {PROVIDERS.map((p) => (
         <button
           key={p.id}
           type="button"
           onClick={() => signIn(p.id)}
           disabled={busy !== null}
-          className="flex w-full items-center justify-center gap-2.5 border border-[var(--border-strong)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--ink)] transition hover:bg-[var(--cream-panel)] disabled:opacity-50"
+          className={
+            isSplit
+              ? 'login-form-split__oauth-btn'
+              : 'flex w-full items-center justify-center gap-2.5 border border-[var(--border-strong)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--ink)] transition hover:bg-[var(--cream-panel)] disabled:opacity-50'
+          }
         >
           {p.icon}
           {busy === p.id ? 'Redirecting…' : p.label}
         </button>
       ))}
       {error && (
-        <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700">
+        <p
+          className={
+            isSplit
+              ? 'login-form-split__alert login-form-split__alert--error'
+              : 'rounded-md border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700'
+          }
+        >
           {error}
         </p>
       )}
-      <p className="text-center text-[11px] text-[var(--ink-faint)]">
-        Google &amp; Apple require enabling providers in your Supabase project
-        (Authentication → Providers).
-      </p>
+      {!isSplit && (
+        <p className="text-center text-[11px] text-[var(--ink-faint)]">
+          Google &amp; Apple require enabling providers in your Supabase project
+          (Authentication → Providers).
+        </p>
+      )}
     </div>
   )
 }

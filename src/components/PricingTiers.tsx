@@ -5,11 +5,11 @@ import { pricingIntro, pricingTiers } from '../data/pricing'
 function tierCtaHref(key: string) {
   switch (key) {
     case 'billing':
-      return `${site.loginUrl}?next=${encodeURIComponent('/billing')}`
+      return `${site.appUrl}/checkout?plan=solo`
     case 'contact-agency':
-      return `mailto:${site.contactEmail}?subject=${encodeURIComponent('AgencyDesk Agency plan')}`
+      return `${site.appUrl}/checkout?plan=agency`
     case 'contact-multi':
-      return `mailto:${site.contactEmail}?subject=${encodeURIComponent('AgencyDesk Multi-office plan')}`
+      return `${site.appUrl}/checkout?plan=multi-office`
     default:
       return site.loginUrl
   }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CreditCard, ExternalLink, Loader2 } from 'lucide-react'
 import type { WorkspaceBilling } from '@/lib/stripe/status'
 import { isSubscriptionActive } from '@/lib/stripe/status'
@@ -17,11 +17,23 @@ export function BillingPanel({
 }) {
   const searchParams = useSearchParams()
   const billingNotice = searchParams.get('billing')
+  const shouldAutoCheckout = searchParams.get('checkout') === '1'
+  const autoCheckoutStarted = useRef(false)
   const [busy, setBusy] = useState<'checkout' | 'portal' | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const status = billing?.subscription_status ?? 'none'
   const active = isSubscriptionActive(status)
+
+  function friendlyBillingError(message: string) {
+    if (/no such price/i.test(message)) {
+      return 'Billing is misconfigured on the server (invalid Stripe price). Contact support or try again later.'
+    }
+    if (/no such customer/i.test(message)) {
+      return 'Your billing profile was reset. Click Subscribe to Pro again.'
+    }
+    return message
+  }
 
   async function startCheckout() {
     setBusy('checkout')
@@ -32,10 +44,24 @@ export function BillingPanel({
       if (!res.ok) throw new Error(data.error ?? 'Checkout failed')
       window.location.href = data.url
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Checkout failed')
+      setError(friendlyBillingError(err instanceof Error ? err.message : 'Checkout failed'))
       setBusy(null)
     }
   }
+
+  useEffect(() => {
+    if (
+      !shouldAutoCheckout ||
+      autoCheckoutStarted.current ||
+      !isOwner ||
+      !stripeConfigured ||
+      active
+    ) {
+      return
+    }
+    autoCheckoutStarted.current = true
+    void startCheckout()
+  }, [shouldAutoCheckout, isOwner, stripeConfigured, active])
 
   async function openPortal() {
     setBusy('portal')
@@ -65,6 +91,12 @@ export function BillingPanel({
         </div>
       </div>
 
+      {shouldAutoCheckout && busy === 'checkout' && !active && (
+        <p className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--gray-50)] px-3 py-2 text-xs text-black">
+          Redirecting to secure Stripe checkout…
+        </p>
+      )}
+
       {billingNotice === 'success' && (
         <p className="mt-4 rounded-lg border border-black bg-[var(--gray-50)] px-3 py-2 text-xs text-black">
           Subscription updated successfully.
@@ -77,7 +109,9 @@ export function BillingPanel({
       <dl className="mt-4 space-y-2 border-t border-[var(--border)] pt-4 text-sm">
         <div className="flex justify-between gap-4">
           <dt className="text-[var(--gray-500)]">Status</dt>
-          <dd className="font-medium capitalize text-black">{status.replace('_', ' ')}</dd>
+          <dd className="font-medium capitalize text-black">
+            {status === 'none' ? 'Not subscribed' : status.replace('_', ' ')}
+          </dd>
         </div>
         {billing?.subscription_plan && (
           <div className="flex justify-between gap-4">

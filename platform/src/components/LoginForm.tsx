@@ -2,24 +2,30 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { safeNextPath } from '@/lib/auth/next-path'
 import { OAuthButtons } from '@/components/OAuthButtons'
 
 export function LoginForm({
   defaultEmail = '',
   lockEmail = false,
   showOAuth = true,
+  variant = 'default',
 }: {
   defaultEmail?: string
   lockEmail?: boolean
   showOAuth?: boolean
+  variant?: 'default' | 'split'
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const nextPath = safeNextPath(searchParams.get('next'))
   const authError = searchParams.get('error')
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState(defaultEmail)
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [fullName, setFullName] = useState('')
   const [workspaceName, setWorkspaceName] = useState('')
   const [busy, setBusy] = useState(false)
@@ -27,6 +33,8 @@ export function LoginForm({
     authError === 'auth' ? 'Sign-in was cancelled or failed. Try again.' : null,
   )
   const [notice, setNotice] = useState<string | null>(null)
+
+  const isSplit = variant === 'split'
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -62,7 +70,7 @@ export function LoginForm({
         })
         if (signInError) throw signInError
       }
-      router.push('/')
+      router.push(nextPath)
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed')
@@ -71,11 +79,180 @@ export function LoginForm({
     }
   }
 
+  async function onForgotPassword() {
+    if (!email.trim()) {
+      setError('Enter your email above, then click Forgot password.')
+      return
+    }
+    setBusy(true)
+    setError(null)
+    setNotice(null)
+    try {
+      const supabase = createClient()
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/login`,
+      })
+      if (resetError) throw resetError
+      setNotice('Password reset link sent — check your inbox.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not send reset email')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (isSplit) {
+    return (
+      <div className="login-form-split">
+        <div className="login-form-split__head">
+          <h2 className="login-form-split__title">Sign in</h2>
+          <p className="login-form-split__sub">Access your operations console</p>
+        </div>
+
+        {showOAuth && !lockEmail && (
+          <>
+            <OAuthButtons nextPath={nextPath} variant="split" />
+            <div className="login-form-split__divider">
+              <span className="login-form-split__divider-line" />
+              <span className="login-form-split__divider-text">OR</span>
+              <span className="login-form-split__divider-line" />
+            </div>
+          </>
+        )}
+
+        {!lockEmail && (
+          <div className="login-form-split__tabs">
+            <button
+              type="button"
+              onClick={() => setMode('signin')}
+              className={`login-form-split__tab${mode === 'signin' ? ' login-form-split__tab--active' : ''}`}
+            >
+              Sign in
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('signup')}
+              className={`login-form-split__tab${mode === 'signup' ? ' login-form-split__tab--active' : ''}`}
+            >
+              Create account
+            </button>
+          </div>
+        )}
+
+        {error && (
+          <p className="login-form-split__alert login-form-split__alert--error">{error}</p>
+        )}
+        {notice && (
+          <p className="login-form-split__alert login-form-split__alert--success">{notice}</p>
+        )}
+
+        <form onSubmit={onSubmit}>
+          {mode === 'signup' && !lockEmail && (
+            <>
+              <div className="login-form-split__field">
+                <label className="login-form-split__label" htmlFor="login-full-name">
+                  Your name
+                </label>
+                <input
+                  id="login-full-name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="login-form-split__input"
+                  placeholder="Jane Smith"
+                />
+              </div>
+              <div className="login-form-split__field">
+                <label className="login-form-split__label" htmlFor="login-workspace">
+                  Agency name
+                </label>
+                <input
+                  id="login-workspace"
+                  value={workspaceName}
+                  onChange={(e) => setWorkspaceName(e.target.value)}
+                  className="login-form-split__input"
+                  placeholder="Smith Insurance Agency"
+                />
+                <p className="login-form-split__hint">
+                  First signup creates your workspace. Later users need an invitation.
+                </p>
+              </div>
+            </>
+          )}
+
+          <div className="login-form-split__field">
+            <label className="login-form-split__label" htmlFor="login-email">
+              Email
+            </label>
+            <div className="login-form-split__input-wrap">
+              <input
+                id="login-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                readOnly={lockEmail}
+                required
+                className="login-form-split__input"
+                placeholder="you@agency.com"
+              />
+              <Mail size={16} className="login-form-split__input-icon" aria-hidden />
+            </div>
+          </div>
+
+          <div className="login-form-split__field">
+            <div className="login-form-split__label-row">
+              <label className="login-form-split__label" htmlFor="login-password">
+                Password
+              </label>
+              {mode === 'signin' && (
+                <button
+                  type="button"
+                  onClick={onForgotPassword}
+                  className="login-form-split__forgot"
+                >
+                  Forgot password?
+                </button>
+              )}
+            </div>
+            <div className="login-form-split__input-wrap">
+              <input
+                id="login-password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+                className="login-form-split__input"
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="login-form-split__toggle"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" disabled={busy} className="login-form-split__submit">
+            {busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in with email'}
+          </button>
+        </form>
+
+        <p className="login-form-split__secure">
+          <Lock size={12} aria-hidden />
+          Your data is encrypted and secure
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="mx-auto w-full max-w-sm">
       {showOAuth && !lockEmail && (
         <>
-          <OAuthButtons />
+          <OAuthButtons nextPath={nextPath} />
           <div className="my-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-[var(--border)]" />
             <span className="console-label">or use email</span>

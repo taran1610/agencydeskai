@@ -16,6 +16,7 @@ import {
   UserCheck,
   Users,
 } from 'lucide-react'
+import { MarketingSiteLink } from '@/components/MarketingSiteLink'
 import type { UserRole } from '@/lib/auth/permissions'
 import { ROLE_LABELS } from '@/lib/auth/permissions'
 
@@ -62,7 +63,7 @@ export function ConsoleSidebar({
 
   return (
     <aside className="flex h-full w-[15.5rem] shrink-0 flex-col border-r border-[var(--border)] bg-white">
-      <div className="flex items-center gap-2.5 border-b border-[var(--border)] px-5 py-4">
+      <MarketingSiteLink className="flex items-center gap-2.5 border-b border-[var(--border)] px-5 py-4 transition hover:bg-[var(--gray-50)]">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white">
           <Bot size={18} strokeWidth={1.75} />
         </div>
@@ -72,7 +73,7 @@ export function ConsoleSidebar({
             Pro
           </p>
         </div>
-      </div>
+      </MarketingSiteLink>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
         {NAV.map((item) => {
