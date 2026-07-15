@@ -1,5 +1,10 @@
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { APP_URL, getStripe, getStripePriceId } from '@/lib/stripe/client'
+import {
+  APP_URL,
+  getStripe,
+  getStripePriceId,
+  isStripeAutomaticTaxEnabled,
+} from '@/lib/stripe/client'
 import type { WorkspaceBilling } from '@/lib/stripe/status'
 import { isSubscriptionActive } from '@/lib/stripe/status'
 
@@ -65,7 +70,7 @@ export async function createCheckoutSession(options: {
   const customerId = await getOrCreateStripeCustomer(workspace, options.email)
   const stripe = getStripe()
 
-  const session = await stripe.checkout.sessions.create({
+  const sessionParams: import('stripe').Stripe.Checkout.SessionCreateParams = {
     mode: 'subscription',
     customer: customerId,
     line_items: [{ price: getStripePriceId(), quantity: 1 }],
@@ -81,15 +86,17 @@ export async function createCheckoutSession(options: {
         workspace_id: workspace.id,
       },
     },
-    automatic_tax: { enabled: true },
-    customer_update: {
-      address: 'auto',
-      name: 'auto',
-    },
     billing_address_collection: 'required',
-    tax_id_collection: { enabled: true },
     allow_promotion_codes: true,
-  })
+  }
+
+  if (isStripeAutomaticTaxEnabled()) {
+    sessionParams.automatic_tax = { enabled: true }
+    sessionParams.customer_update = { address: 'auto', name: 'auto' }
+    sessionParams.tax_id_collection = { enabled: true }
+  }
+
+  const session = await stripe.checkout.sessions.create(sessionParams)
 
   if (!session.url) throw new Error('Could not create checkout session')
   return session.url

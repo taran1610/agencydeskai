@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { CreditCard, ExternalLink, Loader2 } from 'lucide-react'
 import type { WorkspaceBilling } from '@/lib/stripe/status'
 import { isSubscriptionActive } from '@/lib/stripe/status'
+import { friendlyStripeError } from '@/lib/stripe/errors'
 
 export function BillingPanel({
   billing,
@@ -26,13 +27,7 @@ export function BillingPanel({
   const active = isSubscriptionActive(status)
 
   function friendlyBillingError(message: string) {
-    if (/no such price/i.test(message)) {
-      return 'Billing is misconfigured on the server (invalid Stripe price). Contact support or try again later.'
-    }
-    if (/no such customer/i.test(message)) {
-      return 'Your billing profile was reset. Click Subscribe to Pro again.'
-    }
-    return message
+    return friendlyStripeError(message)
   }
 
   async function startCheckout() {

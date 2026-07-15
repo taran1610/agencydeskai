@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+.env.vercel.production
+.env.vercel.*
+
 supabase/.temp/
 
 # Editor directories and files

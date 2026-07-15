@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getAuthContext, isAuthContext, requireAuth } from '@/lib/auth/session'
 import { createCheckoutSession } from '@/lib/stripe/billing'
 import { isStripeConfigured } from '@/lib/stripe/client'
+import { friendlyStripeError } from '@/lib/stripe/errors'
 
 export async function POST() {
   if (!isStripeConfigured()) {
@@ -22,10 +23,8 @@ export async function POST() {
     })
     return NextResponse.json({ url })
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Checkout failed' },
-      { status: 500 },
-    )
+    const raw = error instanceof Error ? error.message : 'Checkout failed'
+    return NextResponse.json({ error: friendlyStripeError(raw) }, { status: 500 })
   }
 }
 

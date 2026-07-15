@@ -10,6 +10,23 @@ export function isStripeConfigured() {
   )
 }
 
+/** Enable only after Stripe Tax head office is configured in Dashboard. */
+export function isStripeAutomaticTaxEnabled() {
+  return process.env.STRIPE_AUTOMATIC_TAX === 'true'
+}
+
+export function isStripeLiveMode() {
+  const key = process.env.STRIPE_SECRET_KEY ?? ''
+  return key.startsWith('sk_live_')
+}
+
+export function getStripeMode(): 'live' | 'test' | 'unknown' {
+  const key = process.env.STRIPE_SECRET_KEY ?? ''
+  if (key.startsWith('sk_live_')) return 'live'
+  if (key.startsWith('sk_test_')) return 'test'
+  return 'unknown'
+}
+
 export function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) {

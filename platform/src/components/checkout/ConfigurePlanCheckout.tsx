@@ -22,6 +22,7 @@ import {
 } from '@/lib/plans'
 import { isSubscriptionActive } from '@/lib/stripe/status'
 import type { WorkspaceBilling } from '@/lib/stripe/status'
+import { friendlyStripeError } from '@/lib/stripe/errors'
 
 const FEATURE_ICONS = [Zap, Star, Sparkles, UserCheck, Beaker] as const
 
@@ -78,7 +79,7 @@ export function ConfigurePlanCheckout({
       if (!res.ok) throw new Error(data.error ?? 'Checkout failed')
       window.location.href = data.url
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Checkout failed')
+      setError(friendlyStripeError(err instanceof Error ? err.message : 'Checkout failed'))
       setBusy(false)
     }
   }
