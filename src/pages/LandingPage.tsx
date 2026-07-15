@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { HeroReviewCard } from '../components/HeroReviewCard'
+import { PricingIntro, PricingTiers } from '../components/PricingTiers'
 import { WaitlistForm } from '../components/WaitlistForm'
 import { SeoHead } from '../components/SeoHead'
 import { SiteFooter } from '../components/SiteFooter'
@@ -128,15 +129,6 @@ const trustBullets = [
     body:
       'Access controls, audit logs, and a paper trail on every action. Built for the way agencies actually handle PII.',
   },
-] as const
-
-const pricingIncludes = [
-  'AI document intake, classification, and extraction',
-  'Human review workflow with confidence scores',
-  'Account analysis, flags, and CRM-ready export',
-  'Workspace roles — owner, reviewer, viewer',
-  'Team invites and audit trail',
-  'CSV and HTML report exports',
 ] as const
 
 export const LandingPage = () => {
@@ -349,42 +341,10 @@ export const LandingPage = () => {
         </section>
 
         {/* PRICING */}
-        <section id="pricing" className="pricing">
+        <section id="pricing" className="pricing-section">
           <div className="container">
-            <div className="section-head">
-              <p className="label">Pricing</p>
-              <h2 className="section-head__title">
-                One plan. Full ops console. Billed per <em>workspace.</em>
-              </h2>
-              <p className="section-head__sub">
-                Cancel anytime. Private beta seats can join the waitlist first —
-                Pro unlocks the full console when you&rsquo;re ready.
-              </p>
-            </div>
-            <div className="pricing__panel">
-              <div className="pricing__offer">
-                <p className="pricing__plan-label">AgencyDesk Pro</p>
-                <div className="pricing__amount">
-                  <span className="pricing__currency">$</span>
-                  <span className="pricing__price">299</span>
-                  <span className="pricing__period">/ month</span>
-                </div>
-                <p className="pricing__note">Per agency workspace · unlimited team members</p>
-                <div className="pricing__actions">
-                  <a href={site.loginUrl} className="btn btn--primary">
-                    Launch console
-                  </a>
-                  <a href="#beta" className="btn btn--outline">
-                    Join waitlist
-                  </a>
-                </div>
-              </div>
-              <ul className="pricing__includes">
-                {pricingIncludes.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
+            <PricingIntro headingLevel="h2" />
+            <PricingTiers />
           </div>
         </section>
 

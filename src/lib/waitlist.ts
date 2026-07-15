@@ -10,8 +10,9 @@ export type WaitlistSaveResult =
   | { ok: true; destination: 'supabase' | 'local' }
   | { ok: false; destination: 'supabase'; error: string }
 
-const isDuplicateEmailError = (message: string) =>
-  /duplicate|unique|already exists/i.test(message)
+const isDuplicateEmailError = (error: { code?: string; message?: string }) =>
+  error.code === '23505' ||
+  /duplicate|unique|already exists/i.test(error.message ?? '')
 
 export const saveWaitlistSignup = async ({
   email,
@@ -32,7 +33,7 @@ export const saveWaitlistSignup = async ({
     return { ok: true, destination: 'supabase' }
   }
 
-  if (isDuplicateEmailError(error.message)) {
+  if (isDuplicateEmailError(error)) {
     return { ok: true, destination: 'supabase' }
   }
 

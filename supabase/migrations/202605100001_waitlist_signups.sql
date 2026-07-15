@@ -17,6 +17,6 @@ on public.waitlist_signups
 for insert
 to anon, authenticated
 with check (
-  email ~* '^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$'
+  email ~* '^[^@]+@[^@]+\.[^@]+$'
   and source in ('hero', 'final')
 );
