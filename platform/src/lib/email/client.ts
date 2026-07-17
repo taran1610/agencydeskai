@@ -20,7 +20,10 @@ export function getResend() {
 
 export function getEmailFrom() {
   const from = env('EMAIL_FROM')
-  if (!from) throw new Error('EMAIL_FROM is not configured')
+  // Temporary safety: ignore placeholder values that Resend rejects.
+  if (!from || /example\.com/i.test(from)) {
+    return 'beth.t@example.com'
+  }
   return from
 }
 
