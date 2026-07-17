@@ -1,4 +1,5 @@
 import Stripe from 'stripe'
+import type { CheckoutPlanId } from '@/lib/plans'
 
 let stripeClient: Stripe | null = null
 
@@ -38,10 +39,30 @@ export function getStripe() {
   return stripeClient
 }
 
-export function getStripePriceId() {
-  const priceId = process.env.STRIPE_PRICE_ID
-  if (!priceId) throw new Error('STRIPE_PRICE_ID is not configured')
+export function getStripePriceId(plan: CheckoutPlanId = 'solo') {
+  const priceByPlan: Record<CheckoutPlanId, string | undefined> = {
+    solo: process.env.STRIPE_PRICE_ID,
+    agency: process.env.STRIPE_PRICE_ID_AGENCY,
+    'multi-office': process.env.STRIPE_PRICE_ID_MULTI_OFFICE,
+  }
+
+  const priceId = priceByPlan[plan]
+  if (!priceId) {
+    if (plan === 'solo') throw new Error('STRIPE_PRICE_ID is not configured')
+    throw new Error(
+      `Stripe price for ${plan} is not configured. Add STRIPE_PRICE_ID_${plan === 'agency' ? 'AGENCY' : 'MULTI_OFFICE'}.`,
+    )
+  }
   return priceId
+}
+
+export function isStripePlanConfigured(plan: CheckoutPlanId) {
+  try {
+    getStripePriceId(plan)
+    return isStripeConfigured()
+  } catch {
+    return false
+  }
 }
 
 export const APP_URL =

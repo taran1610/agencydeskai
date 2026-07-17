@@ -49,6 +49,10 @@ export const documentReadSchema = z.object({
 
 export type DocumentRead = z.infer<typeof documentReadSchema>
 
+/**
+ * OpenAI structured outputs require every property key to appear in `required`.
+ * Do not use `.optional()` here — use empty arrays/strings when unknown.
+ */
 export const accountAnalysisSchema = z.object({
   summary: z
     .string()
@@ -65,8 +69,7 @@ export const accountAnalysisSchema = z.object({
         .describe('What is wrong or missing and which documents are involved'),
       sourceDocuments: z
         .array(z.string())
-        .optional()
-        .describe('Filenames of documents involved in this flag'),
+        .describe('Filenames of documents involved; use [] if unknown'),
     }),
   ),
   suggestedUpdates: z
@@ -75,8 +78,12 @@ export const accountAnalysisSchema = z.object({
         field: z.string().describe('CRM field name, e.g. "Policy expiration"'),
         suggestedValue: z.string(),
         source: z.string().describe('Which document and section supports this'),
-        sourceDocument: z.string().optional().describe('Filename of source document'),
-        sourceSection: z.string().optional().describe('Section or page in the document'),
+        sourceDocument: z
+          .string()
+          .describe('Filename of source document; use "" if unknown'),
+        sourceSection: z
+          .string()
+          .describe('Section or page in the document; use "" if unknown'),
       }),
     )
     .describe('Concrete CRM field updates for a human to approve'),

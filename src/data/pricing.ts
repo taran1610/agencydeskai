@@ -17,7 +17,7 @@ export const pricingIntro = {
   title: 'Priced for independent agencies.',
   description:
     'Plans built around how P&C brokers and agency ops teams actually work — predictable, monthly, no surprises.',
-  footnote: 'Annual billing available · Pilot access for qualifying agencies',
+  footnote: 'Early customers: use code Thanks50 at checkout for 50% off forever · Annual billing available',
 }
 
 export const pricingTiers: readonly PricingTier[] = [

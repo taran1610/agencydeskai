@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-type Provider = 'google' | 'apple'
+type Provider = 'google'
 
 const PROVIDERS: { id: Provider; label: string; icon: ReactNode }[] = [
   {
@@ -29,15 +29,6 @@ const PROVIDERS: { id: Provider; label: string; icon: ReactNode }[] = [
       </svg>
     ),
   },
-  {
-    id: 'apple',
-    label: 'Continue with Apple',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-        <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C4.79 15.25 5.51 7.59 11.68 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.16 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-      </svg>
-    ),
-  },
 ]
 
 export function OAuthButtons({
@@ -56,22 +47,28 @@ export function OAuthButtons({
     setError(null)
     try {
       const supabase = createClient()
-      const callbackUrl = new URL(`${window.location.origin}/api/auth/callback`)
-      callbackUrl.searchParams.set('next', nextPath)
+      // Keep redirect URL free of query params so it always matches Supabase allowlist.
+      // Store the post-login path in a short-lived cookie instead.
+      document.cookie = `auth_next=${encodeURIComponent(nextPath)}; Path=/; Max-Age=600; SameSite=Lax`
+      const callbackUrl = `${window.location.origin}/api/auth/callback`
+
       const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: callbackUrl.toString(),
+          redirectTo: callbackUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
+          },
         },
       })
       if (oauthError) throw oauthError
       if (!data?.url) {
         throw new Error(
-          `Could not start ${provider} sign-in. Enable ${provider} under Supabase → Authentication → Providers.`,
+          'Could not start Google sign-in. Enable Google under Supabase → Authentication → Providers.',
         )
       }
-      // Must redirect manually — otherwise the button appears to do nothing.
-      window.location.href = data.url
+      window.location.assign(data.url)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign-in failed')
       setBusy(null)
@@ -105,12 +102,6 @@ export function OAuthButtons({
           }
         >
           {error}
-        </p>
-      )}
-      {!isSplit && (
-        <p className="text-center text-[11px] text-[var(--ink-faint)]">
-          Google &amp; Apple require enabling providers in your Supabase project
-          (Authentication → Providers).
         </p>
       )}
     </div>

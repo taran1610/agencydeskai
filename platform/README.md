@@ -10,7 +10,9 @@ The main product: an AI operations teammate for insurance agencies.
 2. Enable **Email** (and optionally **Google** / **Apple**) in Supabase → Authentication → Providers.
 3. Supabase → Authentication → URL Configuration:
    - Site URL: `https://agencydeskai-app.vercel.app`
-   - Redirect URL: `https://agencydeskai-app.vercel.app/api/auth/callback`
+   - Redirect URLs (add both):
+     - `https://agencydeskai-app.vercel.app/api/auth/callback`
+     - `https://agencydeskai-app.vercel.app/**`
 4. Vercel project **agencydeskai-app** → Environment Variables (Production):
 
    | Variable | Source |
@@ -24,8 +26,12 @@ The main product: an AI operations teammate for insurance agencies.
    | `STRIPE_PRICE_ID` | Run `npx tsx scripts/stripe-setup.ts` or create in Dashboard |
    | `STRIPE_WEBHOOK_SECRET` | Stripe webhook → `/api/webhooks/stripe` |
    | `NEXT_PUBLIC_APP_URL` | `https://agencydeskai-app.vercel.app` |
+   | `RESEND_API_KEY` | Resend → API Keys |
+   | `EMAIL_FROM` | e.g. `AgencyDesk AI <hello@agencydesk.ai>` |
+   | `EMAIL_REPLY_TO` | Optional reply address |
+   | `RESEND_AUDIENCE_ID` | Optional — for product update broadcasts |
 
-See [docs/STRIPE.md](docs/STRIPE.md) for billing setup (subscriptions, invoicing, tax).
+See [docs/STRIPE.md](docs/STRIPE.md) for billing and [docs/EMAIL.md](docs/EMAIL.md) for the Resend mail funnel.
 
 5. Redeploy after adding env vars.
 
@@ -34,7 +40,7 @@ For Google OAuth: add client ID/secret in Supabase and set Google redirect URI t
 
 ## Auth & roles
 
-Sign in with **Google**, **Apple**, or **email/password**.
+Sign in with **Google** or **email/password**.
 
 | Role | Permissions |
 |------|-------------|
@@ -42,8 +48,8 @@ Sign in with **Google**, **Apple**, or **email/password**.
 | **Reviewer** | Upload, process, review extractions, run analysis, export |
 | **Viewer** | Read-only access to accounts and analyses |
 
-- **First signup** automatically creates a workspace and assigns owner.
-- **Later users** must be invited via Settings → Team (owners only).
+- **Every signup** (Google or email) automatically gets their own workspace as owner.
+- **Invitations** (Settings → Team) add people to an *existing* agency workspace.
 - Invitation links: `https://agencydeskai-app.vercel.app/invite/[token]` (valid 7 days).
 
 ## Core loop

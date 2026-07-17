@@ -41,8 +41,7 @@ export const CHECKOUT_PLANS: Record<CheckoutPlanId, CheckoutPlan> = {
     period: '/month',
     seatNote: 'up to 5 users',
     tagline: 'For growing teams that need shared workflows.',
-    stripeCheckout: false,
-    contactSubject: 'AgencyDesk Agency plan',
+    stripeCheckout: true,
     features: [
       'Unlimited client accounts',
       'Shared team workspace',
@@ -60,8 +59,7 @@ export const CHECKOUT_PLANS: Record<CheckoutPlanId, CheckoutPlan> = {
     period: '/month',
     seatNote: 'up to 20 users',
     tagline: 'For multi-location agency groups.',
-    stripeCheckout: false,
-    contactSubject: 'AgencyDesk Multi-office plan',
+    stripeCheckout: true,
     features: [
       'Everything in Agency',
       'Advanced review workflows',
@@ -70,6 +68,9 @@ export const CHECKOUT_PLANS: Record<CheckoutPlanId, CheckoutPlan> = {
     ],
   },
 }
+
+/** Early-customer promo — enter at Stripe Checkout */
+export const EARLY_CUSTOMER_PROMO_CODE = 'Thanks50'
 
 export const DEFAULT_CHECKOUT_PLAN: CheckoutPlanId = 'solo'
 

@@ -16,10 +16,12 @@ import {
 import { MarketingSiteLink } from '@/components/MarketingSiteLink'
 import {
   CHECKOUT_PLANS,
+  EARLY_CUSTOMER_PROMO_CODE,
   parseCheckoutPlan,
   selectableCheckoutPlans,
   type CheckoutPlanId,
 } from '@/lib/plans'
+import { getMarketingSiteUrl } from '@/lib/marketing-site'
 import { isSubscriptionActive } from '@/lib/stripe/status'
 import type { WorkspaceBilling } from '@/lib/stripe/status'
 import { friendlyStripeError } from '@/lib/stripe/errors'
@@ -74,7 +76,11 @@ export function ConfigurePlanCheckout({
     setBusy(true)
     setError(null)
     try {
-      const res = await fetch('/api/billing/checkout', { method: 'POST' })
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: selectedPlan }),
+      })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Checkout failed')
       window.location.href = data.url
@@ -247,6 +253,15 @@ export function ConfigurePlanCheckout({
               </div>
             </dl>
 
+            {plan.stripeCheckout && (
+              <p className="checkout-summary__promo">
+                Early customer offer: enter code{' '}
+                <strong>{EARLY_CUSTOMER_PROMO_CODE}</strong> at checkout for 50% off
+                forever (US${(plan.price / 2).toFixed(0)}
+                {plan.period}).
+              </p>
+            )}
+
             {error && <p className="checkout-summary__error">{error}</p>}
 
             <button
@@ -272,9 +287,30 @@ export function ConfigurePlanCheckout({
             )}
 
             <p className="checkout-summary__legal">
-              {plan.stripeCheckout
-                ? 'Your subscription renews monthly until canceled. By subscribing you agree to our terms. Tax is calculated automatically via Stripe Tax when enabled.'
-                : 'Our team will follow up with custom onboarding and pricing confirmation.'}
+              {plan.stripeCheckout ? (
+                <>
+                  Your subscription renews monthly until canceled. By subscribing you agree to
+                  our{' '}
+                  <a
+                    href={`${getMarketingSiteUrl()}/terms`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Terms of Use
+                  </a>{' '}
+                  and{' '}
+                  <a
+                    href={`${getMarketingSiteUrl()}/privacy`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Privacy Policy
+                  </a>
+                  .
+                </>
+              ) : (
+                'Our team will follow up with custom onboarding and pricing confirmation.'
+              )}
             </p>
           </aside>
         </div>

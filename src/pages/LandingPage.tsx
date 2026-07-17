@@ -364,8 +364,10 @@ export const LandingPage = () => {
                 <WaitlistForm variant="final" buttonLabel="Request access" />
               </div>
               <p className="cta__legal">
-                We&rsquo;ll only use your email to talk to you about the pilot.{' '}
-                <Link to="/privacy">Privacy policy</Link>
+                By requesting access you agree to our{' '}
+                <Link to="/terms">Terms of Use</Link> and{' '}
+                <Link to="/privacy">Privacy Policy</Link>. We&rsquo;ll only use your email
+                about the pilot.
               </p>
             </div>
           </div>

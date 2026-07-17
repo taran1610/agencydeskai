@@ -22,7 +22,8 @@ export const SiteFooter = () => (
         <span className="footer__col-label">Company</span>
         <a href="/#beta">Pilot access</a>
         <a href={`mailto:${site.contactEmail}`}>Contact</a>
-        <Link to="/privacy">Privacy</Link>
+        <Link to="/privacy">Privacy Policy</Link>
+        <Link to="/terms">Terms of Use</Link>
         <a href={site.appUrl}>Operations console</a>
       </nav>
       <div className="footer__ref" aria-hidden>

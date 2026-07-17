@@ -10,7 +10,6 @@ import {
   Database,
   FileText,
   LayoutDashboard,
-  Plug,
   Settings,
   Sparkles,
   UserCheck,
@@ -28,7 +27,6 @@ const NAV = [
   { href: '/review', label: 'Review & approval', icon: UserCheck },
   { href: '/exports', label: 'CRM & exports', icon: Database },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/integrations', label: 'Integrations', icon: Plug },
   { href: '/billing', label: 'Billing', icon: CreditCard },
   { href: '/settings', label: 'Settings', icon: Settings },
 ] as const
@@ -37,12 +35,10 @@ export function ConsoleSidebar({
   email,
   role,
   displayName,
-  hasAiKey,
 }: {
   email: string
   role: UserRole
   displayName: string | null
-  hasAiKey: boolean
 }) {
   const pathname = usePathname()
   const name = displayName ?? email.split('@')[0] ?? 'User'
@@ -97,28 +93,6 @@ export function ConsoleSidebar({
       </nav>
 
       <div className="space-y-3 border-t border-[var(--border)] p-4">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--gray-50)] p-3">
-          <div className="flex items-center gap-2">
-            <span
-              className={`h-2 w-2 rounded-full ${hasAiKey ? 'bg-black' : 'border border-black bg-white'}`}
-            />
-            <p className="text-xs font-semibold text-black">
-              AI Processing: {hasAiKey ? 'Ready to go' : 'Needs API key'}
-            </p>
-          </div>
-          <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--gray-500)]">
-            {hasAiKey
-              ? 'Documents will be classified and extracted automatically.'
-              : 'Add OPENAI_API_KEY or ANTHROPIC_API_KEY in Vercel (agencydeskai-app), then redeploy.'}
-          </p>
-          <Link
-            href="/integrations"
-            className="mt-2 inline-block text-[11px] font-semibold text-black underline"
-          >
-            View integrations
-          </Link>
-        </div>
-
         <div className="flex items-center gap-2.5 rounded-lg px-1 py-1">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-xs font-semibold text-white">
             {initials}

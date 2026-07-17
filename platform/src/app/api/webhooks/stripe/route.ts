@@ -1,11 +1,37 @@
 import { NextResponse } from 'next/server'
 import type Stripe from 'stripe'
+import { sendPurchaseEmail } from '@/lib/email/send'
+import { CHECKOUT_PLANS, parseCheckoutPlan } from '@/lib/plans'
 import {
   markWorkspaceSubscriptionCanceled,
   syncSubscriptionToWorkspace,
 } from '@/lib/stripe/billing'
 import { getStripe } from '@/lib/stripe/client'
 export const runtime = 'nodejs'
+
+async function sendCheckoutPurchaseEmail(session: Stripe.Checkout.Session) {
+  const email =
+    session.customer_details?.email ||
+    session.customer_email ||
+    null
+  if (!email) return
+
+  const planId = parseCheckoutPlan(session.metadata?.plan)
+  const planLabel = CHECKOUT_PLANS[planId].label
+
+  try {
+    await sendPurchaseEmail({
+      email,
+      userId: session.metadata?.user_id ?? null,
+      workspaceId: session.metadata?.workspace_id ?? session.client_reference_id ?? null,
+      fullName: session.customer_details?.name ?? null,
+      planLabel,
+      sessionId: session.id,
+    })
+  } catch (error) {
+    console.error('Purchase email failed:', error)
+  }
+}
 
 export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
@@ -39,6 +65,7 @@ export async function POST(request: Request) {
           )
           await syncSubscriptionToWorkspace(subscription)
         }
+        await sendCheckoutPurchaseEmail(session)
         break
       }
       case 'customer.subscription.updated':

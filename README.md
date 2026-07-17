@@ -20,6 +20,7 @@ The repo root (`src/`) contains the **marketing site** and waitlist for the priv
 3. Set Vercel env vars on **agencydeskai-app**:
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
    - `ANTHROPIC_API_KEY` and/or `OPENAI_API_KEY`
+   - `RESEND_API_KEY`, `EMAIL_FROM` (see `platform/docs/EMAIL.md`)
 4. Set Vercel env vars on **agencydeskai** (marketing):
    - `VITE_APP_URL=https://agencydeskai-app.vercel.app`
    - `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (waitlist)

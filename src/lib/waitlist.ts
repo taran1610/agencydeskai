@@ -1,3 +1,4 @@
+import { site } from '../config/site'
 import { isSupabaseConfigured, supabase } from './supabase'
 
 export type WaitlistSignup = {
@@ -14,26 +15,43 @@ const isDuplicateEmailError = (error: { code?: string; message?: string }) =>
   error.code === '23505' ||
   /duplicate|unique|already exists/i.test(error.message ?? '')
 
+async function notifyWaitlistEmail(email: string) {
+  try {
+    await fetch(`${site.appUrl}/api/email/waitlist`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+  } catch {
+    // Non-blocking — signup already saved.
+  }
+}
+
 export const saveWaitlistSignup = async ({
   email,
   role,
   source,
 }: WaitlistSignup): Promise<WaitlistSaveResult> => {
+  const normalized = email.trim().toLowerCase()
+
   if (!isSupabaseConfigured || !supabase) {
+    void notifyWaitlistEmail(normalized)
     return { ok: true, destination: 'local' }
   }
 
   const { error } = await supabase.from('waitlist_signups').insert({
-    email: email.trim().toLowerCase(),
+    email: normalized,
     role: role ?? null,
     source,
   })
 
   if (!error) {
+    void notifyWaitlistEmail(normalized)
     return { ok: true, destination: 'supabase' }
   }
 
   if (isDuplicateEmailError(error)) {
+    void notifyWaitlistEmail(normalized)
     return { ok: true, destination: 'supabase' }
   }
 

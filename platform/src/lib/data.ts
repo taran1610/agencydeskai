@@ -273,7 +273,11 @@ export async function getWorkspaceDashboardInsights(
 
 export async function getProfileDisplayName(userId: string): Promise<string | null> {
   const db = supabaseAdmin()
-  const { data } = await db.from('profiles').select('full_name').eq('id', userId).single()
+  const { data } = await db
+    .from('profiles')
+    .select('full_name')
+    .eq('id', userId)
+    .maybeSingle()
   return data?.full_name ?? null
 }
 

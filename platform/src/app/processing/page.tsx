@@ -25,7 +25,7 @@ export default async function ProcessingPage() {
         description={
           hasAiConfigured()
             ? 'Documents waiting to be classified and extracted. Open an account to process files.'
-            : 'AI is not configured yet — add your API key under Integrations to enable processing.'
+            : 'AI is not configured yet — add OPENAI_API_KEY or ANTHROPIC_API_KEY in Vercel, then redeploy.'
         }
       />
       <ProcessingQueue documents={documents} />

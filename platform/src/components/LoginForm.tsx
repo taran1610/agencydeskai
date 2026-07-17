@@ -22,6 +22,7 @@ export function LoginForm({
   const searchParams = useSearchParams()
   const nextPath = safeNextPath(searchParams.get('next'))
   const authError = searchParams.get('error')
+  const authDetail = searchParams.get('detail')
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState(defaultEmail)
   const [password, setPassword] = useState('')
@@ -29,9 +30,17 @@ export function LoginForm({
   const [fullName, setFullName] = useState('')
   const [workspaceName, setWorkspaceName] = useState('')
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(
-    authError === 'auth' ? 'Sign-in was cancelled or failed. Try again.' : null,
-  )
+  const [error, setError] = useState<string | null>(() => {
+    if (authError !== 'auth') return null
+    if (authDetail) {
+      const decoded = decodeURIComponent(authDetail)
+      if (/redirect_uri|redirect url|not allowed/i.test(decoded)) {
+        return 'Google sign-in is misconfigured (redirect URL). Contact support.'
+      }
+      return `Google sign-in failed: ${decoded}`
+    }
+    return 'Google sign-in was cancelled or failed. Please try again.'
+  })
   const [notice, setNotice] = useState<string | null>(null)
 
   const isSplit = variant === 'split'
@@ -70,6 +79,8 @@ export function LoginForm({
         })
         if (signInError) throw signInError
       }
+      // Fire-and-forget welcome (idempotent). OAuth path also sends via callback.
+      void fetch('/api/email/welcome', { method: 'POST' }).catch(() => {})
       router.push(nextPath)
       router.refresh()
     } catch (err) {
@@ -173,7 +184,7 @@ export function LoginForm({
                   placeholder="Smith Insurance Agency"
                 />
                 <p className="login-form-split__hint">
-                  First signup creates your workspace. Later users need an invitation.
+                  We&rsquo;ll create a private workspace for your agency.
                 </p>
               </div>
             </>
@@ -309,7 +320,7 @@ export function LoginForm({
                 placeholder="Smith Insurance Agency"
               />
               <p className="mt-1.5 text-[11px] text-[var(--ink-faint)]">
-                First signup creates your workspace. Later users need an invitation.
+                We&rsquo;ll create a private workspace for your agency.
               </p>
             </div>
           </>

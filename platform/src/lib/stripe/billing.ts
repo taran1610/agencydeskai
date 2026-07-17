@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import type { CheckoutPlanId } from '@/lib/plans'
 import {
   APP_URL,
   getStripe,
@@ -63,7 +64,9 @@ export async function createCheckoutSession(options: {
   workspaceId: string
   email: string
   userId: string
+  plan?: CheckoutPlanId
 }) {
+  const plan = options.plan ?? 'solo'
   const workspace = await getWorkspaceBilling(options.workspaceId)
   if (!workspace) throw new Error('Workspace not found')
 
@@ -73,17 +76,19 @@ export async function createCheckoutSession(options: {
   const sessionParams: import('stripe').Stripe.Checkout.SessionCreateParams = {
     mode: 'subscription',
     customer: customerId,
-    line_items: [{ price: getStripePriceId(), quantity: 1 }],
+    line_items: [{ price: getStripePriceId(plan), quantity: 1 }],
     success_url: `${APP_URL}/billing?billing=success`,
-    cancel_url: `${APP_URL}/checkout?plan=solo&billing=canceled`,
+    cancel_url: `${APP_URL}/checkout?plan=${plan}&billing=canceled`,
     client_reference_id: workspace.id,
     metadata: {
       workspace_id: workspace.id,
       user_id: options.userId,
+      plan,
     },
     subscription_data: {
       metadata: {
         workspace_id: workspace.id,
+        plan,
       },
     },
     billing_address_collection: 'required',

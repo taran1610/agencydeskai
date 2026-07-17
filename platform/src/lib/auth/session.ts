@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { canManageTeam, canWrite, type UserRole } from '@/lib/auth/permissions'
+import { ensureUserWorkspace } from '@/lib/auth/ensure-workspace'
 import { createClient } from '@/lib/supabase/server'
 
 export interface AuthContext {
@@ -14,12 +15,26 @@ export async function getAuthContext(): Promise<AuthContext | null> {
   if (!user) return null
 
   const supabase = await createClient()
-  const { data: membership } = await supabase
+  let { data: membership } = await supabase
     .from('workspace_members')
     .select('workspace_id, role')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
+
+  if (!membership) {
+    try {
+      const full = await supabase.auth.getUser()
+      membership = await ensureUserWorkspace({
+        id: user.id,
+        email: user.email,
+        user_metadata: full.data.user?.user_metadata as Record<string, unknown> | undefined,
+      })
+    } catch (error) {
+      console.error('ensureUserWorkspace failed:', error)
+      return null
+    }
+  }
 
   if (!membership) return null
 

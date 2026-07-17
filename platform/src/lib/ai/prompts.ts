@@ -36,5 +36,7 @@ Rules:
 - Be specific: name the documents, fields, and values involved in every flag.
 - Rank flags by severity: high = blocks submission or renewal, medium = needs follow-up,
   low = informational. List high-severity flags first in your mental ordering.
-- For every flag, list sourceDocuments (filenames) when known.
+- For every flag, always include sourceDocuments (filenames). Use [] if unknown.
+- For every suggestedUpdate, always include sourceDocument and sourceSection strings
+  (use "" if unknown).
 - If the file is thin, say so; a short honest summary beats a padded one.`

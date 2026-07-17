@@ -61,11 +61,8 @@ export default async function SettingsPage() {
         <p className="mt-2 text-xs text-[var(--gray-500)]">
           {hasAiConfigured()
             ? 'API key is configured. Document processing is enabled.'
-            : 'No API key detected. Add ANTHROPIC_API_KEY or OPENAI_API_KEY in your Vercel project.'}
+            : 'No API key detected. Add ANTHROPIC_API_KEY or OPENAI_API_KEY in your Vercel project (agencydeskai-app), then redeploy.'}
         </p>
-        <a href="/integrations" className="mt-3 inline-block text-xs font-semibold text-black underline">
-          View integrations
-        </a>
       </section>
 
       {isOwner && (

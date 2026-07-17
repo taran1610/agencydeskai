@@ -1392,11 +1392,36 @@ em {
   margin-bottom: 12px;
 }
 
+.legal__intro {
+  margin: 0 0 2rem;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--ink-muted, #6b6560);
+}
+
+.legal h3 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink, #111);
+}
+
+.legal__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  margin: 2.5rem 0 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(17, 17, 17, 0.12);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
 .legal p,
 .legal li {
   font-family: var(--font-sans);
-  font-size: 16px;
-  line-height: 1.65;
+  font-size: 0.9375rem;
+  line-height: 1.7;
   color: var(--ink-soft);
 }
 
@@ -1408,6 +1433,11 @@ em {
 
 .legal ul {
   padding-left: 1.25rem;
+  margin: 0.5rem 0 0;
+}
+
+.legal__back {
+  margin-top: 1.5rem;
 }
 
 /* ------------------------------------------------------------------ selection */

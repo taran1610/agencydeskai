@@ -23,10 +23,6 @@ export const metadata: Metadata = {
     'AI operations teammate for insurance agencies: document intake, extraction, flags, and CRM prep with human approval.',
 }
 
-function hasAiConfigured() {
-  return Boolean(process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY)
-}
-
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -34,7 +30,6 @@ export default async function RootLayout({
 }>) {
   const auth = await getAuthContext()
   const displayName = auth ? await getProfileDisplayName(auth.userId) : null
-  const hasAiKey = hasAiConfigured()
   const pathname = (await headers()).get('x-pathname') ?? ''
   const standaloneRoute = pathname === '/checkout' || pathname.startsWith('/checkout/')
 
@@ -42,7 +37,7 @@ export default async function RootLayout({
     <html lang="en" className={`${inter.variable} ${cormorant.variable} h-full antialiased`}>
       <body className="h-full">
         {auth && !standaloneRoute ? (
-          <ConsoleShell auth={auth} displayName={displayName} hasAiKey={hasAiKey}>
+          <ConsoleShell auth={auth} displayName={displayName}>
             {children}
           </ConsoleShell>
         ) : (
