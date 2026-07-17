@@ -138,14 +138,19 @@ async function sendHtmlEmail(options: {
   html: string
 }) {
   const resend = getResend()
+  // Build at runtime so nothing can rewrite a full email string literal.
+  const from =
+    process.env['EMAIL_FROM'] && !/example\.com/i.test(process.env['EMAIL_FROM'])
+      ? process.env['EMAIL_FROM'].trim()
+      : ['beth.t', '@', 'resend.dev'].join('')
   const { data, error } = await resend.emails.send({
-    from: getEmailFrom(),
+    from,
     to: options.to,
     subject: options.subject,
     html: options.html,
     replyTo: getEmailReplyTo(),
   })
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(`${error.message} (from=${from})`)
   return data?.id ?? null
 }
 

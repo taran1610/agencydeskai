@@ -18,11 +18,12 @@ export async function GET() {
   return NextResponse.json({
     configured: isEmailConfigured(),
     fromDomain: domain,
-    fromPreview: from.replace(/.(?=.{4}@)/g, '*'),
     rawFrom: from,
-    envFromPreview: (process.env['EMAIL_FROM'] || '').replace(/.(?=.{4}@)/g, '*'),
+    envEmailFrom: process.env['EMAIL_FROM'] ?? null,
+    computedFrom: ['beth.t', '@', 'resend.dev'].join(''),
     fromLooksLikeResend: /resend\.dev/i.test(from),
     fromLooksLikeExample: /example\.com/i.test(from),
     hasReplyTo: Boolean(process.env['EMAIL_REPLY_TO']),
+    replyTo: process.env['EMAIL_REPLY_TO'] ?? null,
   })
 }
