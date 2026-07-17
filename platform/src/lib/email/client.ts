@@ -20,10 +20,9 @@ export function getResend() {
 
 export function getEmailFrom() {
   const from = env('EMAIL_FROM')
-  // Temporary safety: ignore placeholder values that Resend rejects.
-  if (!from || /example\.com/i.test(from)) {
-    return 'beth.t@example.com'
-  }
+  // Resend test sender — built in pieces so env placeholders can't rewrite it.
+  const resendTestFrom = ['beth.t', '@', 'resend.dev'].join('')
+  if (!from || /example\.com/i.test(from)) return resendTestFrom
   return from
 }
 
