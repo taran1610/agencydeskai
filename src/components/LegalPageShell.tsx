@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { SeoHead } from './SeoHead'
 import { SiteFooter } from './SiteFooter'
+import { SiteHeader } from './SiteHeader'
 import { site } from '../config/site'
 
 export function LegalPageShell({
@@ -22,21 +23,15 @@ export function LegalPageShell({
   return (
     <div className="page page--legal">
       <SeoHead title={title} description={description} path={path} />
-      <header className="nav nav--scrolled nav--legal">
-        <div className="nav__inner">
-          <Link className="brand" to="/" aria-label={`${site.name} home`}>
-            <span className="brand__name">{site.name}</span>
-          </Link>
-          <div className="nav__actions">
-            <Link to="/privacy" className="nav__signin">
-              Privacy
-            </Link>
-            <Link to="/terms" className="nav__cta">
-              Terms
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader
+        ctaHref="/#pilot"
+        links={[
+          { href: '/#product', label: 'Product' },
+          { href: '/pricing', label: 'Pricing' },
+          { href: '/privacy', label: 'Privacy', current: path === '/privacy' },
+          { href: '/terms', label: 'Terms', current: path === '/terms' },
+        ]}
+      />
 
       <main className="legal">
         <div className="container legal__inner">
