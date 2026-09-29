@@ -40,18 +40,6 @@ export function LoginMarketingPanel() {
           </li>
         ))}
       </ul>
-
-      <figure className="login-marketing__quote">
-        <blockquote>
-          &ldquo;AgencyDesk AI saves us hours every week. It&rsquo;s like having an extra team
-          member.&rdquo;
-        </blockquote>
-        <figcaption>
-          <span className="login-marketing__quote-name">Melissa T.</span>
-          <span className="login-marketing__quote-role">Operations Manager</span>
-          <span className="login-marketing__quote-org">Harborview Insurance</span>
-        </figcaption>
-      </figure>
     </aside>
   )
 }
