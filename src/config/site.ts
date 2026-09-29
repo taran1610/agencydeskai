@@ -15,9 +15,9 @@ const appUrl = trimTrailingSlash(
 
 export const site = {
   name: 'AgencyDesk AI',
-  tagline: 'AI operations for insurance brokers',
+  tagline: 'Cited AMS updates for insurance agencies',
   description:
-    'AI that does insurance operations work for brokers. Reads ACORDs, loss runs, and dec pages, summarizes client files, prepares CRM updates, and flags missing forms — so brokers can manage more clients with less manual work.',
+    'AgencyDesk reads ACORD applications, multi-year loss runs, and declaration pages. Every extracted field cites its source page, and CRM updates wait for a person to approve them.',
   url: siteUrl,
   // Use og-image.png for X/Twitter (export from public/og-image.svg). SVG is the source file.
   ogImage: `${siteUrl}/og-image.png`,

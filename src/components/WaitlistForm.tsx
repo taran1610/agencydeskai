@@ -190,27 +190,6 @@ export const WaitlistForm = ({
         </label>
       </p>
 
-      <label htmlFor={inputId} className="waitlist-form__label-sr">
-        Work email
-      </label>
-      <input
-        id={inputId}
-        type="email"
-        name="email"
-        inputMode="email"
-        autoComplete="email"
-        required
-        placeholder={placeholder}
-        value={email}
-        onChange={(e) => {
-          setEmail(e.target.value)
-          if (error) setError(null)
-        }}
-        className="waitlist-form__email"
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-err` : undefined}
-      />
-
       {withRole && (
         <>
           <label htmlFor={roleId} className="waitlist-form__label-sr">
@@ -231,6 +210,27 @@ export const WaitlistForm = ({
           </select>
         </>
       )}
+
+      <label htmlFor={inputId} className="waitlist-form__label-sr">
+        Work email
+      </label>
+      <input
+        id={inputId}
+        type="email"
+        name="email"
+        inputMode="email"
+        autoComplete="email"
+        required
+        placeholder={placeholder}
+        value={email}
+        onChange={(e) => {
+          setEmail(e.target.value)
+          if (error) setError(null)
+        }}
+        className="waitlist-form__email"
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${id}-err` : undefined}
+      />
 
       <button
         type="submit"
