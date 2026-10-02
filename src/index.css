@@ -11,6 +11,11 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 88px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -23,30 +28,37 @@ html,
 body {
   margin: 0;
   padding: 0;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
   font-family:
     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     Helvetica, Arial, sans-serif;
-  background: #f6f3ec;
-  color: #1a2744;
+  background: #ffffff;
+  color: #0f172a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   line-height: 1.55;
   font-size: 16px;
   letter-spacing: -0.005em;
+  position: relative;
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
 img,
 svg {
   display: block;
+  max-width: 100%;
 }
 
 a {
@@ -59,6 +71,6 @@ button {
 }
 
 ::selection {
-  background: rgba(47, 110, 143, 0.18);
-  color: #1a2744;
+  background: rgba(2, 132, 199, 0.18);
+  color: #0f172a;
 }
