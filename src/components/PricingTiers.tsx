@@ -28,8 +28,13 @@ export const PricingTiers = () => (
       return (
         <article
           key={tier.id}
-          className={`pricing-tier${index > 0 ? ' pricing-tier--bordered' : ''}`}
+          className={`pricing-tier${index > 0 ? ' pricing-tier--bordered' : ''}${
+            tier.id === 'agency' ? ' pricing-tier--featured' : ''
+          }`}
         >
+          {tier.id === 'agency' && (
+            <div className="pricing-tier__popular-pill">Recommended for Teams</div>
+          )}
           <p className="pricing-tier__name">{tier.name}</p>
           <div className="pricing-tier__price-row">
             <span className="pricing-tier__amount">
