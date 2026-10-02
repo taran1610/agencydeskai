@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   AlertTriangle,
@@ -11,10 +12,12 @@ import {
   Play,
   Shield,
   ShieldCheck,
+  Sliders,
   Sparkles,
   UserCheck,
 } from 'lucide-react'
 import { AgencyRoiCalculator } from '../components/AgencyRoiCalculator'
+import { InteractiveVideoDemo } from '../components/InteractiveVideoDemo'
 import { PricingIntro, PricingTiers } from '../components/PricingTiers'
 import { ProductConsolePreview } from '../components/ProductConsolePreview'
 import { SeoHead } from '../components/SeoHead'
@@ -205,6 +208,7 @@ const securityPillars = [
 
 export const LandingPage = () => {
   const navScrolled = useScrolledPast(24)
+  const [demoMode, setDemoMode] = useState<'video' | 'sandbox'>('video')
 
   return (
     <div className="page">
@@ -310,24 +314,56 @@ export const LandingPage = () => {
           </div>
         </section>
 
-        {/* FEATURED: INTERACTIVE PRODUCT CONSOLE PREVIEW */}
+        {/* FEATURED: INTERACTIVE PRODUCT DEMO & CONSOLE PREVIEW */}
         <section id="product-demo" className="demo-showcase-section">
           <div className="container">
             <div className="demo-section-head">
               <div className="demo-badge">
                 <Sparkles size={13} />
-                <span>LIVE PRODUCT PREVIEW · INTERACTIVE SANDBOX</span>
+                <span>INTERACTIVE DEMO · 24-SECOND PRODUCT WALKTHROUGH</span>
               </div>
               <h2 className="demo-title">
                 Experience the AgencyDesk <em>operations console.</em>
               </h2>
               <p className="demo-sub">
-                Select a commercial client file below to test the extraction engine, review citation sources, inspect underwriting risk flags, and copy staged CRM blocks.
+                Watch the 24-second motion walkthrough below with interactive chapter jumps, or switch to the live sandbox to test commercial file extractions and risk audits.
               </p>
             </div>
 
-            {/* The Interactive Preview Component with Live Dummy Data */}
-            <ProductConsolePreview />
+            {/* Segmented Mode Switcher */}
+            <div className="demo-mode-toggle-group-wrap">
+              <div className="demo-mode-toggle-group" role="tablist" aria-label="Demo view switcher">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={demoMode === 'video'}
+                  className={`demo-mode-tab ${demoMode === 'video' ? 'demo-mode-tab--active' : ''}`}
+                  onClick={() => setDemoMode('video')}
+                >
+                  <Play size={15} fill={demoMode === 'video' ? 'currentColor' : 'none'} />
+                  <span>Video Walkthrough (24s)</span>
+                  <span className="demo-mode-pill">Interactive</span>
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={demoMode === 'sandbox'}
+                  className={`demo-mode-tab ${demoMode === 'sandbox' ? 'demo-mode-tab--active' : ''}`}
+                  onClick={() => setDemoMode('sandbox')}
+                >
+                  <Sliders size={15} />
+                  <span>Live Sandbox Console</span>
+                  <span className="demo-mode-pill demo-mode-pill--alt">Dummy Data</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Active Demo Showcase */}
+            {demoMode === 'video' ? (
+              <InteractiveVideoDemo onSwitchToSandbox={() => setDemoMode('sandbox')} />
+            ) : (
+              <ProductConsolePreview onSwitchToVideo={() => setDemoMode('video')} />
+            )}
           </div>
         </section>
 

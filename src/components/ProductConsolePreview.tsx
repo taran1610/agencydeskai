@@ -11,6 +11,7 @@ import {
   FileCheck,
   FileSpreadsheet,
   FileText,
+  Play,
   Search,
   ShieldCheck,
   Sparkles,
@@ -382,7 +383,11 @@ Urgent Action: Request renewed central alarm certificate for roasting facility b
 
 type TabKey = 'extractions' | 'documents' | 'flags' | 'crm'
 
-export function ProductConsolePreview() {
+interface ProductConsolePreviewProps {
+  onSwitchToVideo?: () => void
+}
+
+export function ProductConsolePreview({ onSwitchToVideo }: ProductConsolePreviewProps = {}) {
   const [selectedAccountId, setSelectedAccountId] = useState('maple-ridge')
   const [activeTab, setActiveTab] = useState<TabKey>('extractions')
   const [filterConfidence, setFilterConfidence] = useState<'all' | 'high' | 'pending'>('all')
@@ -483,9 +488,22 @@ export function ProductConsolePreview() {
             <span className="product-console__env-pill">OPS CONSOLE 2.4</span>
           </div>
 
-          <div className="product-console__engine-status">
-            <span className="product-console__pulse" />
-            <span>AI Engine Active · 98.4% Confidence</span>
+          <div className="product-console__topbar-actions">
+            {onSwitchToVideo && (
+              <button
+                type="button"
+                onClick={onSwitchToVideo}
+                className="btn-back-to-video"
+                title="Switch back to video demo walkthrough"
+              >
+                <Play size={12} fill="currentColor" />
+                <span>Watch 24s Video Demo</span>
+              </button>
+            )}
+            <div className="product-console__engine-status">
+              <span className="product-console__pulse" />
+              <span>AI Engine Active · 98.4% Confidence</span>
+            </div>
           </div>
         </div>
 
