@@ -77,7 +77,7 @@ export async function createCheckoutSession(options: {
     mode: 'subscription',
     customer: customerId,
     line_items: [{ price: getStripePriceId(plan), quantity: 1 }],
-    success_url: `${APP_URL}/billing?billing=success`,
+    success_url: `${APP_URL}/billing?billing=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${APP_URL}/checkout?plan=${plan}&billing=canceled`,
     client_reference_id: workspace.id,
     metadata: {
@@ -122,10 +122,53 @@ export async function createBillingPortalSession(workspaceId: string) {
   return session.url
 }
 
+async function resolveWorkspaceIdForSubscription(
+  subscription: import('stripe').Stripe.Subscription,
+  hints?: { customerEmail?: string | null; customerId?: string | null },
+): Promise<string | null> {
+  if (subscription.metadata.workspace_id) return subscription.metadata.workspace_id
+
+  const admin = supabaseAdmin()
+  const customerId =
+    hints?.customerId ||
+    (typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id) ||
+    null
+
+  if (customerId) {
+    const { data } = await admin
+      .from('workspaces')
+      .select('id')
+      .eq('stripe_customer_id', customerId)
+      .maybeSingle()
+    if (data?.id) return data.id
+  }
+
+  const email = hints?.customerEmail?.trim().toLowerCase()
+  if (!email) return null
+
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle()
+  if (!profile?.id) return null
+
+  const { data: membership } = await admin
+    .from('workspace_members')
+    .select('workspace_id')
+    .eq('user_id', profile.id)
+    .eq('role', 'owner')
+    .limit(1)
+    .maybeSingle()
+
+  return membership?.workspace_id ?? null
+}
+
 export async function syncSubscriptionToWorkspace(
   subscription: import('stripe').Stripe.Subscription,
+  hints?: { customerEmail?: string | null; customerId?: string | null },
 ) {
-  const workspaceId = subscription.metadata.workspace_id
+  const workspaceId = await resolveWorkspaceIdForSubscription(subscription, hints)
   if (!workspaceId) return
 
   const status = subscription.status
@@ -135,10 +178,15 @@ export async function syncSubscriptionToWorkspace(
     'pro'
 
   const periodEnd = subscription.items.data[0]?.current_period_end
+  const customerId =
+    hints?.customerId ||
+    (typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id) ||
+    null
 
   await supabaseAdmin()
     .from('workspaces')
     .update({
+      ...(customerId ? { stripe_customer_id: customerId } : {}),
       stripe_subscription_id: subscription.id,
       subscription_status: mapSubscriptionStatus(status),
       subscription_plan: plan,
@@ -147,6 +195,26 @@ export async function syncSubscriptionToWorkspace(
         : null,
     })
     .eq('id', workspaceId)
+}
+
+/**
+ * Syncs a completed Checkout Session on return from Stripe, so the plan
+ * activates even if the webhook is delayed or not configured.
+ */
+export async function confirmCheckoutSession(sessionId: string, workspaceId: string) {
+  const session = await getStripe().checkout.sessions.retrieve(sessionId, {
+    expand: ['subscription'],
+  })
+  const sessionWorkspaceId = session.metadata?.workspace_id ?? session.client_reference_id
+  if (sessionWorkspaceId !== workspaceId) return
+  if (session.status !== 'complete') return
+
+  const subscription = session.subscription
+  if (!subscription || typeof subscription === 'string') return
+  if (!subscription.metadata.workspace_id) {
+    subscription.metadata = { ...subscription.metadata, workspace_id: workspaceId }
+  }
+  await syncSubscriptionToWorkspace(subscription)
 }
 
 function mapSubscriptionStatus(status: string): string {

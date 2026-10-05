@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { canManageTeam, canWrite, type UserRole } from '@/lib/auth/permissions'
 import { ensureUserWorkspace } from '@/lib/auth/ensure-workspace'
+import { isSupabasePublicConfigured } from '@/lib/supabase/config'
 import { createClient } from '@/lib/supabase/server'
 
 export interface AuthContext {
@@ -11,6 +12,8 @@ export interface AuthContext {
 }
 
 export async function getAuthContext(): Promise<AuthContext | null> {
+  if (!isSupabasePublicConfigured()) return null
+
   const user = await getSignedInUser()
   if (!user) return null
 
@@ -47,6 +50,8 @@ export async function getAuthContext(): Promise<AuthContext | null> {
 }
 
 export async function getSignedInUser(): Promise<{ id: string; email: string } | null> {
+  if (!isSupabasePublicConfigured()) return null
+
   const supabase = await createClient()
   const {
     data: { user },
