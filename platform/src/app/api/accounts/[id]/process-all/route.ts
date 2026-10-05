@@ -3,7 +3,7 @@ import { isAuthContext, requireAuth, requireWrite } from '@/lib/auth/session'
 import { processAllDocuments } from '@/lib/pipeline'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
-export const maxDuration = 300
+export const maxDuration = 60
 
 export async function POST(
   _request: Request,

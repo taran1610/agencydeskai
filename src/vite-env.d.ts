@@ -6,6 +6,7 @@ interface ImportMetaEnv {
   readonly VITE_CONTACT_EMAIL: string
   readonly VITE_PLAUSIBLE_DOMAIN: string
   readonly VITE_APP_URL: string
+  readonly VITE_STRIPE_PAYMENT_LINK_SOLO?: string
   readonly VITE_SUPABASE_URL: string
   readonly VITE_SUPABASE_ANON_KEY: string
 }
