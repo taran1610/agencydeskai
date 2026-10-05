@@ -1,0 +1,1 @@
+-- Optional local seed data. Schema and demo rows live in supabase/migrations/.
