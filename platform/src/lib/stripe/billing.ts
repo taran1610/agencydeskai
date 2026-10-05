@@ -77,7 +77,7 @@ export async function createCheckoutSession(options: {
     mode: 'subscription',
     customer: customerId,
     line_items: [{ price: getStripePriceId(plan), quantity: 1 }],
-    success_url: `${APP_URL}/billing?billing=success`,
+    success_url: `${APP_URL}/billing?billing=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${APP_URL}/checkout?plan=${plan}&billing=canceled`,
     client_reference_id: workspace.id,
     metadata: {
@@ -147,6 +147,26 @@ export async function syncSubscriptionToWorkspace(
         : null,
     })
     .eq('id', workspaceId)
+}
+
+/**
+ * Syncs a completed Checkout Session on return from Stripe, so the plan
+ * activates even if the webhook is delayed or not configured.
+ */
+export async function confirmCheckoutSession(sessionId: string, workspaceId: string) {
+  const session = await getStripe().checkout.sessions.retrieve(sessionId, {
+    expand: ['subscription'],
+  })
+  const sessionWorkspaceId = session.metadata?.workspace_id ?? session.client_reference_id
+  if (sessionWorkspaceId !== workspaceId) return
+  if (session.status !== 'complete') return
+
+  const subscription = session.subscription
+  if (!subscription || typeof subscription === 'string') return
+  if (!subscription.metadata.workspace_id) {
+    subscription.metadata = { ...subscription.metadata, workspace_id: workspaceId }
+  }
+  await syncSubscriptionToWorkspace(subscription)
 }
 
 function mapSubscriptionStatus(status: string): string {
