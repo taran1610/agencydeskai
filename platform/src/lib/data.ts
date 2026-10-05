@@ -30,6 +30,7 @@ export async function listAccounts(workspaceId: string): Promise<AccountListItem
     .select('*')
     .eq('workspace_id', workspaceId)
     .eq('status', 'active')
+    .eq('is_demo', false)
     .order('created_at', { ascending: false })
     .returns<Account[]>()
   if (error) throw new Error(error.message)
@@ -192,6 +193,7 @@ export async function getWorkspaceDashboardInsights(
     .from('accounts')
     .select('id, name')
     .eq('workspace_id', workspaceId)
+    .eq('is_demo', false)
   const accountIds = (accounts ?? []).map((a) => a.id)
   const accountNames = new Map((accounts ?? []).map((a) => [a.id, a.name]))
 
@@ -302,6 +304,7 @@ async function getWorkspaceAccountIds(workspaceId: string) {
     .select('id, name')
     .eq('workspace_id', workspaceId)
     .eq('status', 'active')
+    .eq('is_demo', false)
   return accounts ?? []
 }
 
