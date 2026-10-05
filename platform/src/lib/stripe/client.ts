@@ -3,12 +3,25 @@ import type { CheckoutPlanId } from '@/lib/plans'
 
 let stripeClient: Stripe | null = null
 
-export function isStripeConfigured() {
-  return Boolean(
-    process.env.STRIPE_SECRET_KEY &&
-      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY &&
-      process.env.STRIPE_PRICE_ID,
+function readEnv(value: string | undefined) {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : undefined
+}
+
+/**
+ * Secret key from the app env, or from the Vercel Stripe integration
+ * (`agencydesk_STRIPE_SECRET_KEY`).
+ */
+export function getStripeSecretKey() {
+  return (
+    readEnv(process.env.STRIPE_SECRET_KEY) ??
+    readEnv(process.env.agencydesk_STRIPE_SECRET_KEY)
   )
+}
+
+/** Hosted Checkout needs a secret key and the Solo price. The publishable key is not used. */
+export function isStripeConfigured() {
+  return Boolean(getStripeSecretKey() && readEnv(process.env.STRIPE_PRICE_ID))
 }
 
 /** Enable only after Stripe Tax head office is configured in Dashboard. */
@@ -17,19 +30,18 @@ export function isStripeAutomaticTaxEnabled() {
 }
 
 export function isStripeLiveMode() {
-  const key = process.env.STRIPE_SECRET_KEY ?? ''
-  return key.startsWith('sk_live_')
+  return (getStripeSecretKey() ?? '').startsWith('sk_live_')
 }
 
 export function getStripeMode(): 'live' | 'test' | 'unknown' {
-  const key = process.env.STRIPE_SECRET_KEY ?? ''
+  const key = getStripeSecretKey() ?? ''
   if (key.startsWith('sk_live_')) return 'live'
   if (key.startsWith('sk_test_')) return 'test'
   return 'unknown'
 }
 
 export function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY
+  const key = getStripeSecretKey()
   if (!key) {
     throw new Error('STRIPE_SECRET_KEY is not configured')
   }
@@ -46,7 +58,7 @@ export function getStripePriceId(plan: CheckoutPlanId = 'solo') {
     'multi-office': process.env.STRIPE_PRICE_ID_MULTI_OFFICE,
   }
 
-  const priceId = priceByPlan[plan]
+  const priceId = readEnv(priceByPlan[plan])
   if (!priceId) {
     if (plan === 'solo') throw new Error('STRIPE_PRICE_ID is not configured')
     throw new Error(
