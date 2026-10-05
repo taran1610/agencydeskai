@@ -63,14 +63,38 @@ export async function POST(request: Request) {
           const subscription = await getStripe().subscriptions.retrieve(
             String(session.subscription),
           )
-          await syncSubscriptionToWorkspace(subscription)
+          const customerId =
+            typeof session.customer === 'string'
+              ? session.customer
+              : session.customer?.id ?? null
+          await syncSubscriptionToWorkspace(subscription, {
+            customerId,
+            customerEmail:
+              session.customer_details?.email || session.customer_email || null,
+          })
         }
         await sendCheckoutPurchaseEmail(session)
         break
       }
       case 'customer.subscription.updated':
       case 'customer.subscription.created': {
-        await syncSubscriptionToWorkspace(event.data.object as Stripe.Subscription)
+        const subscription = event.data.object as Stripe.Subscription
+        const customerId =
+          typeof subscription.customer === 'string'
+            ? subscription.customer
+            : subscription.customer?.id ?? null
+        let customerEmail: string | null = null
+        if (customerId && !subscription.metadata.workspace_id) {
+          try {
+            const customer = await getStripe().customers.retrieve(customerId)
+            if (!('deleted' in customer && customer.deleted)) {
+              customerEmail = customer.email ?? null
+            }
+          } catch {
+            // Fall through — sync may still resolve via customer id.
+          }
+        }
+        await syncSubscriptionToWorkspace(subscription, { customerId, customerEmail })
         break
       }
       case 'customer.subscription.deleted': {

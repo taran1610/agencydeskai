@@ -122,10 +122,53 @@ export async function createBillingPortalSession(workspaceId: string) {
   return session.url
 }
 
+async function resolveWorkspaceIdForSubscription(
+  subscription: import('stripe').Stripe.Subscription,
+  hints?: { customerEmail?: string | null; customerId?: string | null },
+): Promise<string | null> {
+  if (subscription.metadata.workspace_id) return subscription.metadata.workspace_id
+
+  const admin = supabaseAdmin()
+  const customerId =
+    hints?.customerId ||
+    (typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id) ||
+    null
+
+  if (customerId) {
+    const { data } = await admin
+      .from('workspaces')
+      .select('id')
+      .eq('stripe_customer_id', customerId)
+      .maybeSingle()
+    if (data?.id) return data.id
+  }
+
+  const email = hints?.customerEmail?.trim().toLowerCase()
+  if (!email) return null
+
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle()
+  if (!profile?.id) return null
+
+  const { data: membership } = await admin
+    .from('workspace_members')
+    .select('workspace_id')
+    .eq('user_id', profile.id)
+    .eq('role', 'owner')
+    .limit(1)
+    .maybeSingle()
+
+  return membership?.workspace_id ?? null
+}
+
 export async function syncSubscriptionToWorkspace(
   subscription: import('stripe').Stripe.Subscription,
+  hints?: { customerEmail?: string | null; customerId?: string | null },
 ) {
-  const workspaceId = subscription.metadata.workspace_id
+  const workspaceId = await resolveWorkspaceIdForSubscription(subscription, hints)
   if (!workspaceId) return
 
   const status = subscription.status
@@ -135,10 +178,15 @@ export async function syncSubscriptionToWorkspace(
     'pro'
 
   const periodEnd = subscription.items.data[0]?.current_period_end
+  const customerId =
+    hints?.customerId ||
+    (typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id) ||
+    null
 
   await supabaseAdmin()
     .from('workspaces')
     .update({
+      ...(customerId ? { stripe_customer_id: customerId } : {}),
       stripe_subscription_id: subscription.id,
       subscription_status: mapSubscriptionStatus(status),
       subscription_plan: plan,
