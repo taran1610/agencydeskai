@@ -11,13 +11,9 @@ import {
 import { RecentActivity } from '@/components/dashboard/RecentActivity'
 import { FirstRunGuide } from '@/components/onboarding/FirstRunGuide'
 import { StartHere } from '@/components/onboarding/StartHere'
-import { SubscribeBanner } from '@/components/SubscribeBanner'
 import { OverviewQuickNav } from '@/components/sections/OverviewQuickNav'
 import { requireConsolePage } from '@/lib/console-page'
 import { getWorkspaceDashboardInsights, listAccounts, summarizeWorkspace } from '@/lib/data'
-import { getWorkspaceBilling } from '@/lib/stripe/billing'
-import { isStripeConfigured } from '@/lib/stripe/client'
-import { isSubscriptionActive } from '@/lib/stripe/status'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,13 +24,11 @@ export default async function OverviewPage() {
   }
   const { auth, canCreate } = result
 
-  const [accounts, insights, billing] = await Promise.all([
+  const [accounts, insights] = await Promise.all([
     listAccounts(auth.workspaceId),
     getWorkspaceDashboardInsights(auth.workspaceId),
-    getWorkspaceBilling(auth.workspaceId),
   ])
   const stats = summarizeWorkspace(accounts)
-  const subscriptionActive = isSubscriptionActive(billing?.subscription_status ?? 'none')
   const featured = accounts.slice(0, 3)
   const isNewWorkspace = accounts.length === 0
 
@@ -60,12 +54,6 @@ export default async function OverviewPage() {
       {isNewWorkspace ? (
         <StartHere canCreate={canCreate} />
       ) : null}
-
-      <SubscribeBanner
-        isOwner={auth.role === 'owner'}
-        stripeConfigured={isStripeConfigured()}
-        subscriptionActive={subscriptionActive}
-      />
 
       {!isNewWorkspace && (
         <>
