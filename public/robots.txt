@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://agencydesk.ai/sitemap.xml
+Sitemap: https://agencydeskai.vercel.app/sitemap.xml
