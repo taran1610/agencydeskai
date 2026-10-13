@@ -3,17 +3,30 @@ import { NoWorkspaceAccess } from '@/components/NoWorkspaceAccess'
 import { BillingPanel } from '@/components/BillingPanel'
 import { PageHeader } from '@/components/console/PageHeader'
 import { requireConsolePage } from '@/lib/console-page'
-import { getWorkspaceBilling } from '@/lib/stripe/billing'
+import { confirmCheckoutSession, getWorkspaceBilling } from '@/lib/stripe/billing'
 import { isStripeConfigured } from '@/lib/stripe/client'
 
 export const dynamic = 'force-dynamic'
 
-export default async function BillingPage() {
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ session_id?: string }>
+}) {
   const result = await requireConsolePage()
   if ('noWorkspace' in result) {
     return <NoWorkspaceAccess email={result.noWorkspace} />
   }
   const { auth } = result
+
+  const { session_id: sessionId } = await searchParams
+  if (sessionId?.startsWith('cs_') && isStripeConfigured()) {
+    try {
+      await confirmCheckoutSession(sessionId, auth.workspaceId)
+    } catch (error) {
+      console.error('Checkout confirmation failed:', error)
+    }
+  }
 
   const billing = await getWorkspaceBilling(auth.workspaceId)
 

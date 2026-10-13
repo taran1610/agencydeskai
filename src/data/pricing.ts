@@ -35,7 +35,7 @@ export const pricingTiers: readonly PricingTier[] = [
       'CRM-ready export blocks',
     ],
     cta: {
-      label: 'Get started',
+      label: 'Subscribe',
       href: 'billing',
     },
   },
@@ -54,7 +54,7 @@ export const pricingTiers: readonly PricingTier[] = [
       'Priority support',
     ],
     cta: {
-      label: 'Get started',
+      label: 'Contact us',
       href: 'contact-agency',
     },
   },
@@ -72,7 +72,7 @@ export const pricingTiers: readonly PricingTier[] = [
       'Dedicated onboarding support',
     ],
     cta: {
-      label: 'Get started',
+      label: 'Contact us',
       href: 'contact-multi',
     },
   },

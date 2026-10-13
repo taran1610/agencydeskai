@@ -5,11 +5,16 @@ import { pricingIntro, pricingTiers } from '../data/pricing'
 function tierCtaHref(key: string) {
   switch (key) {
     case 'billing':
-      return `${site.appUrl}/checkout?plan=solo`
+      // Live Stripe Payment Link (Solo) — collects payment without the console.
+      // Prefer `${site.appUrl}/checkout?plan=solo` once agencydeskai-app is restored.
+      return (
+        import.meta.env.VITE_STRIPE_PAYMENT_LINK_SOLO ||
+        'https://buy.stripe.com/7sYdR86gP86zgpJfHC0RG00'
+      )
     case 'contact-agency':
-      return `${site.appUrl}/checkout?plan=agency`
+      return `mailto:${site.contactEmail}?subject=${encodeURIComponent('AgencyDesk Agency plan ($799/mo)')}`
     case 'contact-multi':
-      return `${site.appUrl}/checkout?plan=multi-office`
+      return `mailto:${site.contactEmail}?subject=${encodeURIComponent('AgencyDesk Multi-office plan ($1999/mo)')}`
     default:
       return site.loginUrl
   }
@@ -53,7 +58,9 @@ export const PricingTiers = () => (
           <a
             href={href}
             className="pricing-tier__cta"
-            {...(external ? { rel: 'noopener noreferrer' } : {})}
+            {...(external
+              ? { rel: 'noopener noreferrer', target: '_blank' }
+              : {})}
           >
             {tier.cta.label}
             <ArrowUpRight size={16} strokeWidth={2} aria-hidden />
