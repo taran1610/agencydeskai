@@ -1,8 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getAuthContext, getSignedInUser } from '@/lib/auth/session'
-import { ensureDemoDataForWorkspace } from '@/lib/demo/seed'
+import { removeDemoData } from '@/lib/demo/seed'
 import { isSupabaseConfigured } from '@/lib/supabase/admin'
-import { NoWorkspaceAccess } from '@/components/NoWorkspaceAccess'
 import type { AuthContext } from '@/lib/auth/session'
 import { canWrite } from '@/lib/auth/permissions'
 
@@ -24,9 +23,9 @@ export async function requireConsolePage(): Promise<
   }
 
   try {
-    await ensureDemoDataForWorkspace(auth.workspaceId, auth.userId)
+    await removeDemoData(auth.workspaceId, auth.userId)
   } catch (error) {
-    console.error('Demo seed skipped:', error)
+    console.error('Could not remove sample data:', error)
   }
 
   return { auth, canCreate: canWrite(auth.role) }

@@ -19,9 +19,12 @@ export function ReviewQueue({
         <UserCheck className="mx-auto text-[var(--gray-300)]" size={36} />
         <p className="mt-4 text-sm font-semibold text-black">Review queue is empty</p>
         <p className="mx-auto mt-2 max-w-md text-xs text-[var(--gray-500)]">
-          All extracted fields have been reviewed. New pending fields will appear here after AI
-          processing.
+          Nothing is waiting for approval. Upload and process a client file, then extracted fields
+          show up here.
         </p>
+        <Link href="/accounts" className="console-btn-primary mt-6 inline-flex">
+          Go to client accounts
+        </Link>
       </div>
     )
   }

@@ -6,7 +6,7 @@ const STEPS = [
   {
     num: '01',
     title: 'Create a client account',
-    body: 'One account per insured — Maple Ridge Logistics, Smith Family, etc.',
+    body: 'One account per insured — a business or a household.',
   },
   {
     num: '02',

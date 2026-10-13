@@ -8,7 +8,7 @@ import { friendlyStripeError } from '@/lib/stripe/errors'
 export async function POST(request: Request) {
   if (!isStripeConfigured()) {
     return NextResponse.json(
-      { error: 'Stripe is not configured. Add STRIPE_SECRET_KEY, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, and STRIPE_PRICE_ID.' },
+      { error: 'Stripe is not configured. Add STRIPE_SECRET_KEY and STRIPE_PRICE_ID.' },
       { status: 503 },
     )
   }

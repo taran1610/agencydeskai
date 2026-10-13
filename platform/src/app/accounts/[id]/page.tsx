@@ -23,7 +23,7 @@ export default async function AccountPage({
 
   const { id } = await params
   const detail = await getAccountDetail(id, auth.workspaceId)
-  if (!detail) notFound()
+  if (!detail || detail.account.is_demo) notFound()
   const { account, documents, extractions, analyses, auditTrail } = detail
 
   const processedCount = documents.filter((doc) => doc.status === 'processed').length

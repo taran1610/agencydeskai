@@ -40,7 +40,7 @@ export function NewAccountForm() {
         <input
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder="Maple Ridge Logistics"
+          placeholder="Client or business name"
           className="console-input"
           required
           minLength={2}

@@ -17,7 +17,7 @@ export function AccountsGrid({
           <p className="mt-4 text-sm font-semibold text-black">No client accounts yet</p>
           <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-[var(--gray-500)]">
             {canCreate
-              ? 'Create your first account or load sample data to explore the platform.'
+              ? 'Use the form above to add your first client. Their documents, review, and export all live on that account.'
               : 'No accounts in your workspace yet. Ask an owner to create one or send you an invitation.'}
           </p>
         </div>
