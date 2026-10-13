@@ -22,7 +22,7 @@ Sends are idempotent via `email_events` (one welcome / waitlist per email; one p
 | `EMAIL_FROM` | Yes | `AgencyDesk AI <hello@agencydesk.ai>` |
 | `EMAIL_REPLY_TO` | Optional | `liber1821@gmail.com` |
 | `RESEND_AUDIENCE_ID` | Optional | Audience ID from Resend for broadcasts |
-| `NEXT_PUBLIC_MARKETING_URL` | Optional | `https://agencydesk.ai` (CORS for waitlist API) |
+| `NEXT_PUBLIC_MARKETING_URL` | Optional | `https://agencydeskai.vercel.app` (CORS for waitlist API) |
 
 Without `RESEND_API_KEY` / `EMAIL_FROM`, email calls no-op (logged) so signup and billing still work.
 

@@ -1,11 +1,11 @@
+import { DEFAULT_SITE_URL } from './defaultSiteUrl'
+
 const trimTrailingSlash = (url: string) => url.replace(/\/$/, '')
 
 /** Public contact for footer, privacy, and form placeholders */
 export const CONTACT_EMAIL = 'liber1821@gmail.com'
 
-const siteUrl = trimTrailingSlash(
-  import.meta.env.VITE_SITE_URL || 'https://agencydesk.ai',
-)
+const siteUrl = trimTrailingSlash(import.meta.env.VITE_SITE_URL || DEFAULT_SITE_URL)
 
 const xHandleRaw = (import.meta.env.VITE_X_HANDLE || '').replace(/^@/, '')
 

@@ -1,10 +1,11 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+import { DEFAULT_SITE_URL } from './src/config/defaultSiteUrl'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const siteUrl = (env.VITE_SITE_URL || 'https://agencydesk.ai').replace(/\/$/, '')
+  const siteUrl = (env.VITE_SITE_URL || DEFAULT_SITE_URL).replace(/\/$/, '')
   const ogImage = `${siteUrl}/og-image.png`
   const xHandle = (env.VITE_X_HANDLE || '').replace(/^@/, '')
 

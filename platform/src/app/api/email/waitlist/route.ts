@@ -10,8 +10,6 @@ function corsHeaders(request: Request) {
   const allowed = [
     process.env.NEXT_PUBLIC_MARKETING_URL?.replace(/\/$/, ''),
     'https://agencydeskai.vercel.app',
-    'https://agencydesk.ai',
-    'https://www.agencydesk.ai',
     'http://localhost:5173',
     'http://localhost:4173',
   ].filter(Boolean) as string[]

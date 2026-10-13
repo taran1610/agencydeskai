@@ -1,14 +1,12 @@
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { DEFAULT_SITE_URL } from '../src/config/defaultSiteUrl.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const publicDir = join(root, 'public')
 
-const siteUrl = (process.env.VITE_SITE_URL || 'https://agencydesk.ai').replace(
-  /\/$/,
-  '',
-)
+const siteUrl = (process.env.VITE_SITE_URL || DEFAULT_SITE_URL).replace(/\/$/, '')
 
 const today = new Date().toISOString().slice(0, 10)
 

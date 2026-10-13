@@ -12,12 +12,12 @@ Set these before your first production build:
 
 | Variable | Example | Why |
 |----------|---------|-----|
-| `VITE_SITE_URL` | `https://agencydesk.ai` | Canonical URL, sitemap, X card image URL |
+| `VITE_SITE_URL` | `https://agencydeskai.vercel.app` | Canonical URL, sitemap, Open Graph and X card image URL |
 | `VITE_X_HANDLE` | `agencydeskai` | Footer link + optional analytics |
 | `VITE_CONTACT_EMAIL` | `liber1821@gmail.com` | Footer + privacy page |
 | `VITE_SUPABASE_URL` | `https://xxx.supabase.co` | Store waitlist signups |
 | `VITE_SUPABASE_ANON_KEY` | `eyJ...` | Public insert-only key |
-| `VITE_PLAUSIBLE_DOMAIN` | `agencydesk.ai` | Optional traffic analytics |
+| `VITE_PLAUSIBLE_DOMAIN` | `agencydeskai.vercel.app` | Optional traffic analytics |
 
 See [supabase-setup.md](./supabase-setup.md) for the database.
 
